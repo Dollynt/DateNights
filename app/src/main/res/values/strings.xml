@@ -21,4 +21,7 @@
     <string name="login_failed">"Login failed"</string>
     <string name="error_empty_fields">error</string>
     <string name="error_google_sign_in_failed">error</string>
+    <string name="register_prompt">Don\'t have an account? Click here to register</string>
+    <string name="title_activity_register">ActivityRegister</string>
+    <string name="login_prompt">Already have an account? Click here to login</string>
 </resources>

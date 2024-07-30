@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.dollynt.datenights.MainActivity
 import com.dollynt.datenights.R
 import com.dollynt.datenights.databinding.ActivityLoginBinding
+import com.dollynt.datenights.ui.register.RegisterActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -45,6 +46,11 @@ class LoginActivity : AppCompatActivity() {
             } else {
                 Snackbar.make(binding.root, R.string.error_empty_fields, Snackbar.LENGTH_SHORT).show()
             }
+        }
+
+        binding.registerTextView?.setOnClickListener {
+            val intent = Intent(this, RegisterActivity::class.java)
+            startActivity(intent)
         }
 
         viewModel.user.observe(this) { user ->

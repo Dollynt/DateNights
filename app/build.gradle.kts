@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.dollynt.datenights"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.dollynt.datenights"
@@ -36,7 +36,6 @@ android {
     }
     buildFeatures {
         viewBinding = true
-        dataBinding = true
     }
 }
 
