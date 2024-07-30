@@ -1,5 +1,6 @@
 package com.dollynt.datenights
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import com.google.android.material.snackbar.Snackbar
@@ -11,18 +12,52 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
+import com.dollynt.datenights.adapter.DateIdeasAdapter
 import com.dollynt.datenights.databinding.ActivityMainBinding
+import com.dollynt.datenights.ui.login.LoginActivity
+import com.dollynt.datenights.ui.login.LoginViewModel
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+    private lateinit var viewModel: LoginViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        if (Firebase.auth.currentUser == null) {
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+            return
+        }
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        viewModel = ViewModelProvider(this).get(LoginViewModel::class.java)
+
+//        val adapter = DateIdeasAdapter(listOf())
+//        binding.dateIdeasRecyclerView.adapter = adapter
+//        binding.dateIdeasRecyclerView.layoutManager = LinearLayoutManager(this)
+//
+//        binding.randomizeButton.setOnClickListener {
+//            viewModel.getRandomDateIdeas()
+//        }
+
+        viewModel.user.observe(this) { user ->
+            if (user != null) {
+                // Navegar para a próxima tela ou exibir conteúdo relevante
+            }
+        }
+
+//        viewModel.dateIdeas.observe(this) { dateIdeas ->
+//            adapter.updateDateIdeas(dateIdeas)
+//        }
 
         setSupportActionBar(binding.appBarMain.toolbar)
 
