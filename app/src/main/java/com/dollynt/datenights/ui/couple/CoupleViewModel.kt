@@ -1,51 +1,53 @@
 package com.dollynt.datenights.ui.couple
 
-import androidx.lifecycle.ViewModel
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
+import com.dollynt.datenights.repository.CoupleRepository
+import kotlinx.coroutines.launch
 
-class CoupleViewModel : ViewModel() {
+class CoupleViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val db = FirebaseFirestore.getInstance()
-    private val auth = FirebaseAuth.getInstance()
+    private val repository = CoupleRepository(application)
+    private val _isCoupleCreated = MutableLiveData<Boolean>()
+    val isCoupleCreated: LiveData<Boolean> = _isCoupleCreated
+    private val _inviteLink = MutableLiveData<String>()
+    val inviteLink: LiveData<String> = _inviteLink
+    private val _inviteCode = MutableLiveData<String>()
+    val inviteCode: LiveData<String> = _inviteCode
 
-    fun joinCoupleWithToken(token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        val user = auth.currentUser ?: return
+    init {
+        _isCoupleCreated.value = repository.getCoupleCreatedState()
+    }
 
-        // Find the user with the given token
-        db.collection("users").whereEqualTo("secretInviteToken", token).get()
-            .addOnSuccessListener { documents ->
-                if (documents.isEmpty) {
-                    onFailure(Exception("Invalid token"))
-                    return@addOnSuccessListener
-                }
-
-                val user1 = documents.documents[0].id
-                val couple = hashMapOf(
-                    "user1" to user1,
-                    "user2" to user.uid,
-                    "createdAt" to System.currentTimeMillis()
-                )
-
-                db.collection("couples").add(couple)
-                    .addOnSuccessListener { documentReference ->
-                        // Update the coupleId in both users' documents
-                        val coupleId = documentReference.id
-                        db.collection("users").document(user1).update("coupleId", coupleId)
-                        db.collection("users").document(user.uid).update("coupleId", coupleId)
-                            .addOnSuccessListener {
-                                onSuccess()
-                            }
-                            .addOnFailureListener { e ->
-                                onFailure(e)
-                            }
-                    }
-                    .addOnFailureListener { e ->
-                        onFailure(e)
-                    }
+    fun createCouple(userId: String) {
+        viewModelScope.launch {
+            if (!repository.isUserInCouple(userId)) {
+                _isCoupleCreated.value = repository.createCouple(userId)
+                generateInviteDetails(userId)
+            } else {
+                _isCoupleCreated.value = true
             }
-            .addOnFailureListener { e ->
-                onFailure(e)
+        }
+    }
+
+    fun joinCouple(userId: String, inviteCode: String) {
+        viewModelScope.launch {
+            if (!repository.isUserInCouple(userId)) {
+                _isCoupleCreated.value = repository.joinCouple(userId, inviteCode)
+                generateInviteDetails(userId)
+            } else {
+                _isCoupleCreated.value = true
             }
+        }
+    }
+
+    private fun generateInviteDetails(userId: String) {
+        viewModelScope.launch {
+            _inviteLink.value = repository.generateInviteLink(userId)
+            _inviteCode.value = repository.generateInviteCode(userId)
+        }
     }
 }
