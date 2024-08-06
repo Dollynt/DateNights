@@ -39,13 +39,10 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
 
     fun joinCouple(userId: String, inviteCode: String) {
         viewModelScope.launch {
-            if (!repository.isUserInCouple(userId)) {
-                _isCoupleCreated.value = repository.joinCouple(userId, inviteCode)
-                if (_isCoupleCreated.value == true) {
-                    generateInviteDetails()
-                }
-            } else {
-                _isCoupleCreated.value = true
+            val success = repository.joinCouple(userId, inviteCode)
+            _isCoupleCreated.value = success
+            if (success) {
+                generateInviteDetails()
             }
         }
     }
