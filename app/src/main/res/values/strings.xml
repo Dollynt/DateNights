@@ -29,4 +29,7 @@
     <string name="title_couple">Couple</string>
     <string name="title_history">History\n</string>
     <string name="title_profile">Profile</string>
+    <string name="copy_code">code</string>
+    <string name="copy_link">link</string>
+    <string name="share_link">link</string>
 </resources>

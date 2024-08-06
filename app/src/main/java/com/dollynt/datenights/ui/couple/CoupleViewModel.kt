@@ -6,6 +6,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.dollynt.datenights.repository.CoupleRepository
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.auth.ktx.auth
 import kotlinx.coroutines.launch
 
 class CoupleViewModel(application: Application) : AndroidViewModel(application) {
@@ -19,14 +21,16 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
     val inviteCode: LiveData<String> = _inviteCode
 
     init {
-        _isCoupleCreated.value = repository.getCoupleCreatedState()
+        checkCoupleStatus()
     }
 
     fun createCouple(userId: String) {
         viewModelScope.launch {
             if (!repository.isUserInCouple(userId)) {
                 _isCoupleCreated.value = repository.createCouple(userId)
-                generateInviteDetails(userId)
+                if (_isCoupleCreated.value == true) {
+                    generateInviteDetails()
+                }
             } else {
                 _isCoupleCreated.value = true
             }
@@ -37,17 +41,36 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch {
             if (!repository.isUserInCouple(userId)) {
                 _isCoupleCreated.value = repository.joinCouple(userId, inviteCode)
-                generateInviteDetails(userId)
+                if (_isCoupleCreated.value == true) {
+                    generateInviteDetails()
+                }
             } else {
                 _isCoupleCreated.value = true
             }
         }
     }
 
-    private fun generateInviteDetails(userId: String) {
+    private fun generateInviteDetails() {
         viewModelScope.launch {
-            _inviteLink.value = repository.generateInviteLink(userId)
-            _inviteCode.value = repository.generateInviteCode(userId)
+            val userId = Firebase.auth.currentUser?.uid ?: return@launch
+            val couple = repository.getCoupleByUserId(userId)
+            if (couple != null) {
+                _inviteLink.value = "https://datenights.app/invite?code=${couple.inviteCode}"
+                _inviteCode.value = couple.inviteCode
+            }
+        }
+    }
+
+    fun checkCoupleStatus(userId: String? = Firebase.auth.currentUser?.uid) {
+        userId?.let {
+            viewModelScope.launch {
+                val couple = repository.getCoupleByUserId(it)
+                _isCoupleCreated.value = couple != null
+                if (couple != null) {
+                    _inviteLink.value = "https://datenights.app/invite?code=${couple.inviteCode}"
+                    _inviteCode.value = couple.inviteCode
+                }
+            }
         }
     }
 }

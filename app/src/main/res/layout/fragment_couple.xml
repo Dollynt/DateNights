@@ -6,89 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".ui.couple.CoupleFragment">
 
-    <!-- Layout para criar um casal -->
-    <LinearLayout
-        android:id="@+id/createCoupleLayout"
+    <FrameLayout
+        android:id="@+id/coupleContentFrame"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="visible"
+        android:layout_height="match_parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <Button
-            android:id="@+id/createCoupleButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Create Couple" />
-
-        <Button
-            android:id="@+id/showJoinCoupleLayoutButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Join Couple" />
-
-    </LinearLayout>
-
-    <!-- Layout para participar de um casal -->
-    <LinearLayout
-        android:id="@+id/enterJoinCodeLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="gone"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <EditText
-            android:id="@+id/joinCoupleCodeInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:hint="Enter Code" />
-
-        <Button
-            android:id="@+id/joinCoupleButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Join Couple" />
-
-    </LinearLayout>
-
-    <!-- Layout para opções de convite -->
-    <LinearLayout
-        android:id="@+id/inviteOptionsLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="gone"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Deseja convidar alguém? Mande este link:" />
-
-        <TextView
-            android:id="@+id/inviteLinkTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Invite Link" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Deseja convidar alguém? Use este código:" />
-
-        <TextView
-            android:id="@+id/inviteCodeTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Invite Code" />
-
-    </LinearLayout>
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
