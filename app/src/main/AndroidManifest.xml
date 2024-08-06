@@ -28,18 +28,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.DateNights.NoActionBar">
-        </activity>
-        <activity android:name=".ui.couple.CoupleActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https"
-                    android:host="datenights.page.link"/>
-            </intent-filter>
         </activity>
     </application>
 
