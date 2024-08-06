@@ -25,4 +25,8 @@
     <string name="title_activity_register">ActivityRegister</string>
     <string name="login_prompt">Already have an account? Click here to login</string>
     <string name="logout">Logout</string>
+    <string name="title_home">Home</string>
+    <string name="title_couple">Couple</string>
+    <string name="title_history">History\n</string>
+    <string name="title_profile">Profile</string>
 </resources>

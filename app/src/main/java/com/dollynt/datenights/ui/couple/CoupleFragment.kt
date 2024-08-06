@@ -1,21 +1,21 @@
-package com.dollynt.datenights.ui.home
+package com.dollynt.datenights.ui.couple
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.dollynt.datenights.databinding.FragmentHomeBinding
+import com.dollynt.datenights.databinding.FragmentCoupleBinding
 
-class HomeFragment : Fragment() {
+class CoupleFragment : Fragment() {
 
-    private var _binding: FragmentHomeBinding? = null
+    private var _binding: FragmentCoupleBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        _binding = FragmentCoupleBinding.inflate(inflater, container, false)
         return binding.root
     }
 
