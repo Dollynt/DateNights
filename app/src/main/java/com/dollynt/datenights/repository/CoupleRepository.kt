@@ -1,7 +1,10 @@
 package com.dollynt.datenights.repository
 
 import android.content.Context
+import android.net.Uri
 import com.dollynt.datenights.model.Couple
+import com.google.firebase.dynamiclinks.DynamicLink
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FieldValue
 import kotlinx.coroutines.tasks.await
@@ -19,9 +22,11 @@ class CoupleRepository(context: Context) {
     }
 
     suspend fun createCouple(userId: String): Boolean {
+        val inviteCode = generateUniqueInviteCode()
         val couple = Couple(
             users = listOf(userId),
-            inviteCode = generateInviteCode()
+            inviteCode = inviteCode,
+            inviteLink = generateInviteLink(inviteCode)
         )
         val result = db.collection("couples").add(couple).await()
         return result.id.isNotEmpty()
@@ -59,10 +64,38 @@ class CoupleRepository(context: Context) {
         return couple?.users?.size == 2
     }
 
-    private fun generateInviteCode(): String {
+    private suspend fun generateUniqueInviteCode(): String {
         val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
-        return (1..8)
-            .map { chars.random() }
-            .joinToString("")
+        var inviteCode: String
+        var isUnique = false
+
+        while (!isUnique) {
+            inviteCode = (1..8).map { chars.random() }.joinToString("")
+            val snapshot = db.collection("couples")
+                .whereEqualTo("inviteCode", inviteCode)
+                .get()
+                .await()
+            if (snapshot.documents.isEmpty()) {
+                isUnique = true
+                return inviteCode
+            }
+        }
+        throw Exception("Unable to generate a unique invite code")
     }
+
+    private suspend fun generateInviteLink(inviteCode: String): String {
+        val dynamicLink = FirebaseDynamicLinks.getInstance().createDynamicLink()
+            .setLink(Uri.parse("https://datenights.page.link/invite?inviteCode=$inviteCode"))
+            .setDomainUriPrefix("https://datenights.page.link")
+            .setAndroidParameters(
+                DynamicLink.AndroidParameters.Builder("com.dollynt.datenights") // Especifique o nome do pacote aqui
+                    .setFallbackUrl(Uri.parse("https://play.google.com/store/apps/details?id=com.dollynt.datenights"))
+                    .build()
+            )
+            .buildShortDynamicLink()
+            .await()
+
+        return dynamicLink.shortLink.toString()
+    }
+
 }

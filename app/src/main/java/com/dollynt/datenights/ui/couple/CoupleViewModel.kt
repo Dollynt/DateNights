@@ -54,7 +54,7 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
             val userId = Firebase.auth.currentUser?.uid ?: return@launch
             val couple = repository.getCoupleByUserId(userId)
             if (couple != null) {
-                _inviteLink.value = "https://datenights.app/invite?code=${couple.inviteCode}"
+                _inviteLink.value = couple.inviteLink
                 _inviteCode.value = couple.inviteCode
                 checkIfCoupleComplete(userId)
             }
