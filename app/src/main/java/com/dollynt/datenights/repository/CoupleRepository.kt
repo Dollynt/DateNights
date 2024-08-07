@@ -54,6 +54,11 @@ class CoupleRepository(context: Context) {
         }
     }
 
+    suspend fun isCoupleComplete(userId: String): Boolean {
+        val couple = getCoupleByUserId(userId)
+        return couple?.users?.size == 2
+    }
+
     private fun generateInviteCode(): String {
         val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
         return (1..8)

@@ -15,6 +15,8 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
     private val repository = CoupleRepository(application)
     private val _isCoupleCreated = MutableLiveData<Boolean>()
     val isCoupleCreated: LiveData<Boolean> = _isCoupleCreated
+    private val _isCoupleComplete = MutableLiveData<Boolean>()
+    val isCoupleComplete: LiveData<Boolean> = _isCoupleComplete
     private val _inviteLink = MutableLiveData<String>()
     val inviteLink: LiveData<String> = _inviteLink
     private val _inviteCode = MutableLiveData<String>()
@@ -54,6 +56,7 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
             if (couple != null) {
                 _inviteLink.value = "https://datenights.app/invite?code=${couple.inviteCode}"
                 _inviteCode.value = couple.inviteCode
+                checkIfCoupleComplete(userId)
             }
         }
     }
@@ -66,8 +69,15 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
                 if (couple != null) {
                     _inviteLink.value = "https://datenights.app/invite?code=${couple.inviteCode}"
                     _inviteCode.value = couple.inviteCode
+                    checkIfCoupleComplete(it)
                 }
             }
+        }
+    }
+
+    private fun checkIfCoupleComplete(userId: String) {
+        viewModelScope.launch {
+            _isCoupleComplete.value = repository.isCoupleComplete(userId)
         }
     }
 }

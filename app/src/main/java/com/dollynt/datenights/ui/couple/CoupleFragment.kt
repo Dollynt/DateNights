@@ -42,33 +42,40 @@ class CoupleFragment : Fragment() {
             contentFrame.removeAllViews()
 
             if (isCoupleCreated) {
-                val inviteOptionsView = layoutInflater.inflate(R.layout.view_invite_options, contentFrame, false)
-                contentFrame.addView(inviteOptionsView)
+                viewModel.isCoupleComplete.observe(viewLifecycleOwner) { isCoupleComplete ->
+                    if (isCoupleComplete) {
+                        val coupleCompleteView = layoutInflater.inflate(R.layout.view_couple_complete, contentFrame, false)
+                        contentFrame.addView(coupleCompleteView)
+                    } else {
+                        val inviteOptionsView = layoutInflater.inflate(R.layout.view_invite_options, contentFrame, false)
+                        contentFrame.addView(inviteOptionsView)
 
-                val inviteLinkTextView = inviteOptionsView.findViewById<TextView>(R.id.inviteLinkTextView)
-                val inviteCodeTextView = inviteOptionsView.findViewById<TextView>(R.id.inviteCodeTextView)
-                val copyLinkButton = inviteOptionsView.findViewById<ImageButton>(R.id.copyLinkButton)
-                val shareLinkButton = inviteOptionsView.findViewById<ImageButton>(R.id.shareLinkButton)
-                val copyCodeButton = inviteOptionsView.findViewById<ImageButton>(R.id.copyCodeButton)
+                        val inviteLinkTextView = inviteOptionsView.findViewById<TextView>(R.id.inviteLinkTextView)
+                        val inviteCodeTextView = inviteOptionsView.findViewById<TextView>(R.id.inviteCodeTextView)
+                        val copyLinkButton = inviteOptionsView.findViewById<ImageButton>(R.id.copyLinkButton)
+                        val shareLinkButton = inviteOptionsView.findViewById<ImageButton>(R.id.shareLinkButton)
+                        val copyCodeButton = inviteOptionsView.findViewById<ImageButton>(R.id.copyCodeButton)
 
-                viewModel.inviteLink.observe(viewLifecycleOwner) { inviteLink ->
-                    inviteLinkTextView.text = inviteLink
-                }
+                        viewModel.inviteLink.observe(viewLifecycleOwner) { inviteLink ->
+                            inviteLinkTextView.text = inviteLink
+                        }
 
-                viewModel.inviteCode.observe(viewLifecycleOwner) { inviteCode ->
-                    inviteCodeTextView.text = inviteCode
-                }
+                        viewModel.inviteCode.observe(viewLifecycleOwner) { inviteCode ->
+                            inviteCodeTextView.text = inviteCode
+                        }
 
-                copyLinkButton.setOnClickListener {
-                    copyToClipboard(inviteLinkTextView.text.toString(), "Link copiado!")
-                }
+                        copyLinkButton.setOnClickListener {
+                            copyToClipboard(inviteLinkTextView.text.toString(), "Link copiado!")
+                        }
 
-                shareLinkButton.setOnClickListener {
-                    shareLink(inviteLinkTextView.text.toString())
-                }
+                        shareLinkButton.setOnClickListener {
+                            shareLink(inviteLinkTextView.text.toString())
+                        }
 
-                copyCodeButton.setOnClickListener {
-                    copyToClipboard(inviteCodeTextView.text.toString(), "Código copiado!")
+                        copyCodeButton.setOnClickListener {
+                            copyToClipboard(inviteCodeTextView.text.toString(), "Código copiado!")
+                        }
+                    }
                 }
             } else {
                 val createOrJoinView = layoutInflater.inflate(R.layout.view_create_or_join_couple, contentFrame, false)
