@@ -49,6 +49,16 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    fun deleteCouple(userId: String) {
+        viewModelScope.launch {
+            repository.deleteCouple(userId)
+            _isCoupleCreated.value = false
+            _isCoupleComplete.value = false
+            _inviteLink.value = ""
+            _inviteCode.value = ""
+        }
+    }
+
     private fun generateInviteDetails() {
         viewModelScope.launch {
             val userId = Firebase.auth.currentUser?.uid ?: return@launch

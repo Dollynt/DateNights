@@ -103,7 +103,16 @@
                 android:contentDescription="@string/copy_code"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:padding="8dp"
-                android:tint="@color/iconTintColor" />
+                app:tint="@color/iconTintColor" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
+
+    <Button
+        android:id="@+id/deleteCoupleButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Delete Couple"
+        android:backgroundTint="?attr/colorError"
+        android:textColor="@android:color/white"/>
 </LinearLayout>

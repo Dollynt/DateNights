@@ -47,6 +47,17 @@ class CoupleRepository(context: Context) {
         return false
     }
 
+    suspend fun deleteCouple(userId: String) {
+        val snapshot = db.collection("couples")
+            .whereArrayContains("users", userId)
+            .get()
+            .await()
+        if (snapshot.documents.isNotEmpty()) {
+            val coupleId = snapshot.documents[0].id
+            db.collection("couples").document(coupleId).delete().await()
+        }
+    }
+
     suspend fun getCoupleByUserId(userId: String): Couple? {
         val snapshot = db.collection("couples")
             .whereArrayContains("users", userId)

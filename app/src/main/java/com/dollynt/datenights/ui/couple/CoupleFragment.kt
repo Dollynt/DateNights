@@ -1,5 +1,6 @@
 package com.dollynt.datenights.ui.couple
 
+import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -55,6 +56,7 @@ class CoupleFragment : Fragment() {
                         val copyLinkButton = inviteOptionsView.findViewById<ImageButton>(R.id.copyLinkButton)
                         val shareLinkButton = inviteOptionsView.findViewById<ImageButton>(R.id.shareLinkButton)
                         val copyCodeButton = inviteOptionsView.findViewById<ImageButton>(R.id.copyCodeButton)
+                        val deleteCoupleButton = inviteOptionsView.findViewById<Button>(R.id.deleteCoupleButton)
 
                         viewModel.inviteLink.observe(viewLifecycleOwner) { inviteLink ->
                             inviteLinkTextView.text = inviteLink
@@ -74,6 +76,10 @@ class CoupleFragment : Fragment() {
 
                         copyCodeButton.setOnClickListener {
                             copyToClipboard(inviteCodeTextView.text.toString(), "Código copiado!")
+                        }
+
+                        deleteCoupleButton.setOnClickListener {
+                            showDeleteConfirmationDialog()
                         }
                     }
                 }
@@ -105,6 +111,21 @@ class CoupleFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    private fun showDeleteConfirmationDialog() {
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setMessage("Tem certeza que deseja excluir o casal?")
+            .setPositiveButton("Sim") { dialog, id ->
+                val userId = Firebase.auth.currentUser?.uid
+                if (userId != null) {
+                    viewModel.deleteCouple(userId)
+                }
+            }
+            .setNegativeButton("Não") { dialog, id ->
+                dialog.dismiss()
+            }
+        builder.create().show()
     }
 
     private fun copyToClipboard(text: String, toastMessage: String) {
