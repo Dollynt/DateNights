@@ -7,8 +7,12 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="backgroundColor">#F5F5F5</color>
     <color name="primaryTextColor">#212121</color>
     <color name="cardBackgroundColor">#FFFFFF</color>
     <color name="iconTintColor">#FF4081</color>
+    <color name="primaryColor">#D2691E</color> <!-- Laranja Queimado -->
+    <color name="primaryColorDark">#A0522D</color> <!-- Laranja Queimado Escuro -->
+    <color name="accentColor">#F5DEB3</color> <!-- Bege Claro -->
+    <color name="backgroundColor">#FFF8DC</color> <!-- Bege Claro Suave -->
+    <color name="textColorPrimary">#FFFFFF</color> <!-- Branco para textos -->
 </resources>
