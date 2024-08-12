@@ -20,7 +20,7 @@
         <item name="colorPrimaryDark">@color/primaryColorDark</item>
         <item name="colorAccent">@color/accentColor</item>
         <item name="android:windowBackground">@color/backgroundColor</item>
-        <item name="android:textColorPrimary">@color/textColorPrimary</item>
+        <item name="android:textColorPrimary">@color/black</item>
         <!-- Customize your theme here -->
         <item name="colorOnPrimary">@color/textColorPrimary</item>
         <item name="android:statusBarColor">@color/primaryColorDark</item>

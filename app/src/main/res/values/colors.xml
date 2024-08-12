@@ -12,9 +12,10 @@
     <color name="iconTintColor">#FF4081</color>
     <color name="primaryColor">#D2691E</color> <!-- Laranja Queimado -->
     <color name="primaryColorDark">#A0522D</color> <!-- Laranja Queimado Escuro -->
-    <color name="welcome_color">#FF8C00</color> <!-- Alaranjado -->
+    <color name="textSecondaryColor">#AF5C44</color> <!-- Alaranjado -->
     <color name="orientation_color">#FFB84D</color> <!-- Cor de pêssego claro -->
     <color name="accentColor">#F5DEB3</color> <!-- Bege Claro -->
     <color name="backgroundColor">#FFF8DC</color> <!-- Bege Claro Suave -->
     <color name="textColorPrimary">#FFFFFF</color> <!-- Branco para textos -->
+    <color name="brighterDark">#5B4C48</color> <!-- Preto para textos -->
 </resources>
