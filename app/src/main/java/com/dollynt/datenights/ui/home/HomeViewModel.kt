@@ -1,13 +1,23 @@
 package com.dollynt.datenights.ui.home
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.dollynt.datenights.repository.CoupleRepository
+import kotlinx.coroutines.launch
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is home Fragment"
+    private val repository = CoupleRepository(application)
+    private val _isInCouple = MutableLiveData<Boolean>()
+    val isInCouple: LiveData<Boolean> = _isInCouple
+
+    fun checkCoupleStatus(userId: String) {
+        viewModelScope.launch {
+            val isUserInCouple = repository.isUserInCouple(userId)
+            _isInCouple.value = isUserInCouple
+        }
     }
-    val text: LiveData<String> = _text
 }
