@@ -10,7 +10,7 @@
 
     <TextView
         android:id="@+id/welcome_message"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Bem-vindo!"
         android:textSize="28sp"
@@ -18,7 +18,9 @@
         android:textColor="@color/primaryColorDark"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="24dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/orientation_message"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
         android:id="@+id/orientation_message"
@@ -30,8 +32,10 @@
         android:textSize="18sp"
         android:textAlignment="viewStart"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/welcome_message"
-        app:layout_constraintWidth_percent="0.8" />
+        app:layout_constraintBottom_toTopOf="@id/choose_message"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
         android:id="@+id/choose_message"
@@ -43,28 +47,29 @@
         android:textSize="18sp"
         android:textAlignment="viewStart"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/orientation_message"
-        app:layout_constraintWidth_percent="0.8" />
+        app:layout_constraintBottom_toTopOf="@id/button_container"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <!-- Container Vertical -->
     <LinearLayout
         android:id="@+id/button_container"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintTop_toBottomOf="@id/choose_message"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_percent="0.5"
-        app:layout_constraintWidth_percent="0.8">
+        android:layout_marginTop="5dp"
+        >
 
         <!-- Botão Opções do Aplicativo -->
         <LinearLayout
             android:id="@+id/app_options_button"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/rounded_button"
             android:backgroundTint="@color/white"
@@ -73,8 +78,7 @@
 
             <ImageView
                 android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_weight="1"
+                android:layout_height="wrap_content"
                 android:src="@drawable/app_options"
                 android:layout_gravity="center" />
 
@@ -92,8 +96,7 @@
         <LinearLayout
             android:id="@+id/couple_options_button"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/rounded_button"
             android:backgroundTint="@color/white"
@@ -101,8 +104,7 @@
 
             <ImageView
                 android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_weight="1"
+                android:layout_height="wrap_content"
                 android:src="@drawable/custom_options"
                 android:layout_gravity="center" />
 
