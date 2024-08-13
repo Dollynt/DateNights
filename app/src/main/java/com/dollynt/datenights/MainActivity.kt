@@ -2,17 +2,13 @@ package com.dollynt.datenights
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.dollynt.datenights.adapter.ViewPagerAdapter
 import com.dollynt.datenights.databinding.ActivityMainBinding
-import com.dollynt.datenights.ui.couple.CoupleFragment
-import com.dollynt.datenights.ui.history.HistoryFragment
-import com.dollynt.datenights.ui.home.HomeFragment
+import com.dollynt.datenights.ui.couple.CoupleViewModel
 import com.dollynt.datenights.ui.login.LoginActivity
-import com.dollynt.datenights.ui.profile.ProfileFragment
 import com.dollynt.datenights.ui.user.UserViewModel
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.ktx.auth
@@ -22,6 +18,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var userViewModel: UserViewModel
+    private lateinit var coupleViewModel: CoupleViewModel
+    private lateinit var viewPagerAdapter: ViewPagerAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,23 +36,28 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setContentView(binding.root)
 
         userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
+        coupleViewModel = ViewModelProvider(this)[CoupleViewModel::class.java]
+        viewPagerAdapter = ViewPagerAdapter(this)
+        binding.viewPager.adapter = viewPagerAdapter
+
+        coupleViewModel.checkCoupleStatus()
 
         binding.bottomNavigation.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.navigation_home -> {
-                    loadFragment(HomeFragment())
+                    binding.viewPager.currentItem = 0
                     true
                 }
                 R.id.navigation_couple -> {
-                    loadFragment(CoupleFragment())
+                    binding.viewPager.currentItem = 1
                     true
                 }
                 R.id.navigation_history -> {
-                    loadFragment(HistoryFragment())
+                    binding.viewPager.currentItem = 2
                     true
                 }
                 R.id.navigation_profile -> {
-                    loadFragment(ProfileFragment())
+                    binding.viewPager.currentItem = 3
                     true
                 }
                 else -> false
@@ -63,15 +66,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         // Carrega o fragmento inicial
         if (savedInstanceState == null) {
-            binding.bottomNavigation.selectedItemId = R.id.navigation_home
+            binding.viewPager.currentItem = 0
         }
-    }
-
-    private fun loadFragment(fragment: Fragment) {
-        Log.d("MainActivity", "Loading fragment: ${fragment::class.java.simpleName}")
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.nav_host_fragment, fragment)
-            .commit()
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
