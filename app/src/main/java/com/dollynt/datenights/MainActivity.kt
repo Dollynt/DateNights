@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.viewpager2.widget.ViewPager2
 import com.dollynt.datenights.adapter.ViewPagerAdapter
 import com.dollynt.datenights.databinding.ActivityMainBinding
 import com.dollynt.datenights.ui.couple.CoupleViewModel
@@ -63,6 +64,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 else -> false
             }
         }
+
+        binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                when (position) {
+                    0 -> binding.bottomNavigation.selectedItemId = R.id.navigation_home
+                    1 -> binding.bottomNavigation.selectedItemId = R.id.navigation_couple
+                    2 -> binding.bottomNavigation.selectedItemId = R.id.navigation_history
+                    3 -> binding.bottomNavigation.selectedItemId = R.id.navigation_profile
+                }
+            }
+        })
+
 
         // Carrega o fragmento inicial
         if (savedInstanceState == null) {
