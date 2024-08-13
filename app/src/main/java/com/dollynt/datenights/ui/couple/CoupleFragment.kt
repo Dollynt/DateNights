@@ -31,86 +31,101 @@ class CoupleFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentCoupleBinding.inflate(inflater, container, false)
-        viewModel = ViewModelProvider(this).get(CoupleViewModel::class.java)
+        viewModel = ViewModelProvider(requireActivity()).get(CoupleViewModel::class.java)
 
-        val user = Firebase.auth.currentUser
+        viewModel.checkCoupleStatus(Firebase.auth.currentUser?.uid)
 
-        viewModel.checkCoupleStatus(user?.uid ?: "")
-
-        viewModel.isCoupleCreated.observe(viewLifecycleOwner) { isCoupleCreated ->
-            val contentFrame = binding.coupleContentFrame
-            val layoutInflater = LayoutInflater.from(context)
-            contentFrame.removeAllViews()
-
-            if (isCoupleCreated) {
-                viewModel.isCoupleComplete.observe(viewLifecycleOwner) { isCoupleComplete ->
-                    if (isCoupleComplete) {
-                        val coupleCompleteView = layoutInflater.inflate(R.layout.view_couple_complete, contentFrame, false)
-                        contentFrame.addView(coupleCompleteView)
-                    } else {
-                        val inviteOptionsView = layoutInflater.inflate(R.layout.view_invite_options, contentFrame, false)
-                        contentFrame.addView(inviteOptionsView)
-
-                        val inviteLinkTextView = inviteOptionsView.findViewById<TextView>(R.id.inviteLinkTextView)
-                        val inviteCodeTextView = inviteOptionsView.findViewById<TextView>(R.id.inviteCodeTextView)
-                        val copyLinkButton = inviteOptionsView.findViewById<ImageButton>(R.id.copyLinkButton)
-                        val shareLinkButton = inviteOptionsView.findViewById<ImageButton>(R.id.shareLinkButton)
-                        val copyCodeButton = inviteOptionsView.findViewById<ImageButton>(R.id.copyCodeButton)
-                        val deleteCoupleButton = inviteOptionsView.findViewById<Button>(R.id.deleteCoupleButton)
-
-                        viewModel.inviteLink.observe(viewLifecycleOwner) { inviteLink ->
-                            inviteLinkTextView.text = inviteLink
-                        }
-
-                        viewModel.inviteCode.observe(viewLifecycleOwner) { inviteCode ->
-                            inviteCodeTextView.text = inviteCode
-                        }
-
-                        copyLinkButton.setOnClickListener {
-                            copyToClipboard(inviteLinkTextView.text.toString(), "Link copiado!")
-                        }
-
-                        shareLinkButton.setOnClickListener {
-                            shareLink(inviteLinkTextView.text.toString())
-                        }
-
-                        copyCodeButton.setOnClickListener {
-                            copyToClipboard(inviteCodeTextView.text.toString(), "Código copiado!")
-                        }
-
-                        deleteCoupleButton.setOnClickListener {
-                            showDeleteConfirmationDialog()
-                        }
-                    }
-                }
-            } else {
-                val createOrJoinView = layoutInflater.inflate(R.layout.view_create_or_join_couple, contentFrame, false)
-                contentFrame.addView(createOrJoinView)
-
-                val createCoupleButton = createOrJoinView.findViewById<Button>(R.id.createCoupleButton)
-                val showJoinCoupleLayoutButton = createOrJoinView.findViewById<Button>(R.id.showJoinCoupleLayoutButton)
-
-                createCoupleButton.setOnClickListener {
-                    viewModel.createCouple(user?.uid ?: "")
-                }
-
-                showJoinCoupleLayoutButton.setOnClickListener {
-                    val joinCoupleView = layoutInflater.inflate(R.layout.view_join_couple, contentFrame, false)
-                    contentFrame.removeAllViews()
-                    contentFrame.addView(joinCoupleView)
-
-                    val joinCoupleButton = joinCoupleView.findViewById<Button>(R.id.joinCoupleButton)
-                    val joinCoupleCodeInput = joinCoupleView.findViewById<EditText>(R.id.joinCoupleCodeInput)
-
-                    joinCoupleButton.setOnClickListener {
-                        val code = joinCoupleCodeInput.text.toString()
-                        viewModel.joinCouple(user?.uid ?: "", code)
-                    }
-                }
-            }
+        viewModel.isInCouple.observe(viewLifecycleOwner) { isInCouple ->
+            updateLayout(isInCouple)
         }
 
         return binding.root
+    }
+
+    private fun updateLayout(isInCouple: Boolean) {
+        val contentFrame = binding.coupleContentFrame
+        val layoutInflater = LayoutInflater.from(context)
+
+        contentFrame.removeAllViews()
+
+        if (isInCouple) {
+            viewModel.isCoupleComplete.observe(viewLifecycleOwner) { isCoupleComplete ->
+                if (isCoupleComplete) {
+                    showCoupleComplete(layoutInflater, contentFrame)
+                } else {
+                    showInviteOptions(layoutInflater, contentFrame)
+                }
+            }
+        } else {
+            showCreateOrJoinCouple(layoutInflater, contentFrame)
+        }
+    }
+
+    private fun showCoupleComplete(layoutInflater: LayoutInflater, contentFrame: ViewGroup) {
+        val coupleCompleteView = layoutInflater.inflate(R.layout.view_couple_complete, contentFrame, false)
+        contentFrame.addView(coupleCompleteView)
+    }
+
+    private fun showInviteOptions(layoutInflater: LayoutInflater, contentFrame: ViewGroup) {
+        val inviteOptionsView = layoutInflater.inflate(R.layout.view_invite_options, contentFrame, false)
+        contentFrame.addView(inviteOptionsView)
+
+        val inviteLinkTextView = inviteOptionsView.findViewById<TextView>(R.id.inviteLinkTextView)
+        val inviteCodeTextView = inviteOptionsView.findViewById<TextView>(R.id.inviteCodeTextView)
+        val copyLinkButton = inviteOptionsView.findViewById<ImageButton>(R.id.copyLinkButton)
+        val shareLinkButton = inviteOptionsView.findViewById<ImageButton>(R.id.shareLinkButton)
+        val copyCodeButton = inviteOptionsView.findViewById<ImageButton>(R.id.copyCodeButton)
+        val deleteCoupleButton = inviteOptionsView.findViewById<Button>(R.id.deleteCoupleButton)
+
+        viewModel.inviteLink.observe(viewLifecycleOwner) { inviteLink ->
+            inviteLinkTextView.text = inviteLink
+        }
+
+        viewModel.inviteCode.observe(viewLifecycleOwner) { inviteCode ->
+            inviteCodeTextView.text = inviteCode
+        }
+
+        copyLinkButton.setOnClickListener {
+            copyToClipboard(inviteLinkTextView.text.toString(), "Link copiado!")
+        }
+
+        shareLinkButton.setOnClickListener {
+            shareLink(inviteLinkTextView.text.toString())
+        }
+
+        copyCodeButton.setOnClickListener {
+            copyToClipboard(inviteCodeTextView.text.toString(), "Código copiado!")
+        }
+
+        deleteCoupleButton.setOnClickListener {
+            showDeleteConfirmationDialog()
+        }
+    }
+
+    private fun showCreateOrJoinCouple(layoutInflater: LayoutInflater, contentFrame: ViewGroup) {
+        val createOrJoinView = layoutInflater.inflate(R.layout.view_create_or_join_couple, contentFrame, false)
+        contentFrame.addView(createOrJoinView)
+
+        val createCoupleButton = createOrJoinView.findViewById<Button>(R.id.createCoupleButton)
+        val showJoinCoupleLayoutButton = createOrJoinView.findViewById<Button>(R.id.showJoinCoupleLayoutButton)
+
+        createCoupleButton.setOnClickListener {
+            viewModel.createCouple(Firebase.auth.currentUser?.uid ?: "")
+        }
+
+        showJoinCoupleLayoutButton.setOnClickListener {
+            val joinCoupleView = layoutInflater.inflate(R.layout.view_join_couple, contentFrame, false)
+            contentFrame.removeAllViews()
+            contentFrame.addView(joinCoupleView)
+
+            val joinCoupleButton = joinCoupleView.findViewById<Button>(R.id.joinCoupleButton)
+            val joinCoupleCodeInput = joinCoupleView.findViewById<EditText>(R.id.joinCoupleCodeInput)
+
+            joinCoupleButton.setOnClickListener {
+                val code = joinCoupleCodeInput.text.toString()
+                viewModel.joinCouple(Firebase.auth.currentUser?.uid ?: "", code)
+            }
+        }
     }
 
     private fun showDeleteConfirmationDialog() {

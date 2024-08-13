@@ -5,19 +5,42 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.dollynt.datenights.repository.CoupleRepository
 import kotlinx.coroutines.launch
 
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = CoupleRepository(application)
-    private val _isInCouple = MutableLiveData<Boolean>()
-    val isInCouple: LiveData<Boolean> = _isInCouple
+    // LiveData para armazenar as opções de randomização
+    private val _randomizationOptions = MutableLiveData<List<String>>()
+    val randomizationOptions: LiveData<List<String>> = _randomizationOptions
 
-    fun checkCoupleStatus(userId: String) {
+    // LiveData para armazenar a opção selecionada
+    private val _selectedOption = MutableLiveData<String>()
+    val selectedOption: LiveData<String> = _selectedOption
+
+    init {
+        // Inicializa as opções de randomização com valores padrão
+        _randomizationOptions.value = listOf("What to Eat", "What to Do", "What to Play")
+    }
+
+    // Função para atualizar as opções de randomização
+    fun updateRandomizationOptions(options: List<String>) {
+        _randomizationOptions.value = options
+    }
+
+    // Função para definir a opção selecionada
+    fun selectOption(option: String) {
+        _selectedOption.value = option
+    }
+
+    // Função para randomizar uma opção da lista
+    fun randomizeOption() {
         viewModelScope.launch {
-            val isUserInCouple = repository.isUserInCouple(userId)
-            _isInCouple.value = isUserInCouple
+            _randomizationOptions.value?.let { options ->
+                if (options.isNotEmpty()) {
+                    val randomOption = options.random()
+                    _selectedOption.value = randomOption
+                }
+            }
         }
     }
 }

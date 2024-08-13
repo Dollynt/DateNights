@@ -10,8 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.dollynt.datenights.R
 import com.dollynt.datenights.databinding.FragmentHomeBinding
 import com.dollynt.datenights.databinding.FragmentHomeNoCoupleBinding
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
+import com.dollynt.datenights.ui.couple.CoupleViewModel
 
 class HomeFragment : Fragment() {
 
@@ -20,32 +19,24 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
     private val bindingNoCouple get() = _bindingNoCouple!!
 
+    private lateinit var coupleViewModel: CoupleViewModel
     private var isInCouple: Boolean? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
-        val viewModel = ViewModelProvider(this)[HomeViewModel::class.java]
-
-        val user = Firebase.auth.currentUser
-        user?.uid?.let {
-            viewModel.checkCoupleStatus(it)
+    ): View? {
+        coupleViewModel = ViewModelProvider(requireActivity()).get(CoupleViewModel::class.java)
+        coupleViewModel.isInCouple.observe(viewLifecycleOwner) { isCouple ->
+            isInCouple = isCouple
+            updateLayout(inflater, container)
         }
 
-        // Inflate the placeholder layout initially
         return inflater.inflate(R.layout.fragment_home_placeholder, container, false)
-            .apply {
-                // Observe the couple status and update the layout accordingly
-                viewModel.isInCouple.observe(viewLifecycleOwner) { isCouple ->
-                    isInCouple = isCouple
-                    // Update the layout
-                    updateLayout(inflater, container)
-                }
-            }
     }
 
     private fun updateLayout(inflater: LayoutInflater, container: ViewGroup?) {
         val fragmentContainer = view?.findViewById<FrameLayout>(R.id.fragment_container)
+
         val newView = if (isInCouple == true) {
             _bindingNoCouple = null
             _binding = FragmentHomeBinding.inflate(inflater, container, false)
