@@ -55,7 +55,7 @@
             android:id="@+id/swipe_to_enter_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="0.5"
+            android:layout_weight="1"
             android:text="Arraste para o lado para criar ou entrar em um."
             android:textSize="18sp"
             android:textColor="@color/textSecondaryColor"
