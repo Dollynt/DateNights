@@ -12,6 +12,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -93,17 +94,27 @@ class HomeFragment : Fragment() {
 
         val dynamicOptionsContainer = selectOptionsView.findViewById<LinearLayout>(R.id.dynamic_options_container)
         val btnRandomize = selectOptionsView.findViewById<Button>(R.id.btn_randomize)
+        val backIcon = selectOptionsView.findViewById<ImageView>(R.id.back_icon)
+
+        // Configurando o botão de voltar
+        backIcon.setOnClickListener {
+            binding.root.removeAllViews()
+            updateLayout(LayoutInflater.from(context), binding.root as ViewGroup)
+        }
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            binding.root.removeAllViews()
+            updateLayout(LayoutInflater.from(context), binding.root as ViewGroup)
+        }
 
         options.forEach { option ->
             val optionView = inflater.inflate(R.layout.layout_option_item, dynamicOptionsContainer, false)
             val checkBox = optionView.findViewById<CheckBox>(R.id.cb_option).apply {
                 text = option.name
-                textSize = 20.0F
             }
             val expandIcon = optionView.findViewById<ImageView>(R.id.expand_icon)
             val subOptionsContainer = optionView.findViewById<LinearLayout>(R.id.sub_options_container)
 
-            // Add suboptions dynamically
             option.subOptions.forEach { subOption ->
                 val subOptionView = inflater.inflate(android.R.layout.simple_list_item_1, subOptionsContainer, false)
                 val subOptionTextView = subOptionView.findViewById<TextView>(android.R.id.text1)
@@ -111,14 +122,13 @@ class HomeFragment : Fragment() {
                 subOptionsContainer.addView(subOptionView)
             }
 
-            // Toggle visibility of subOptionsContainer
             expandIcon.setOnClickListener {
                 if (subOptionsContainer.visibility == View.GONE) {
                     subOptionsContainer.visibility = View.VISIBLE
-                    expandIcon.setImageResource(R.drawable.ic_expand_less)  // Update icon to indicate it's expanded
+                    expandIcon.setImageResource(R.drawable.ic_expand_less)
                 } else {
                     subOptionsContainer.visibility = View.GONE
-                    expandIcon.setImageResource(R.drawable.ic_expand_more)  // Update icon to indicate it's collapsed
+                    expandIcon.setImageResource(R.drawable.ic_expand_more)
                 }
             }
 
@@ -138,7 +148,6 @@ class HomeFragment : Fragment() {
         binding.root.addView(selectOptionsView)
     }
 
-
     private fun getSelectedOptions(container: LinearLayout, options: List<Option>): List<Option> {
         val selectedOptions = mutableListOf<Option>()
         for (i in 0 until container.childCount) {
@@ -149,13 +158,6 @@ class HomeFragment : Fragment() {
             }
         }
         return selectedOptions
-    }
-
-    private fun setupExpandableListView(listView: ExpandableListView, title: String, subOptions: List<String>) {
-        val listDataHeader = listOf(title)
-        val listDataChild = hashMapOf(title to subOptions)
-        val listAdapter = ExpandableListAdapter(requireContext(), listDataHeader, listDataChild)
-        listView.setAdapter(listAdapter)
     }
 
     private fun randomizeOptions(selectedOptions: List<Option>) {
