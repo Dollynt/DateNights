@@ -58,6 +58,17 @@
             android:orientation="vertical"/>
     </ScrollView>
 
+    <ImageView
+        android:id="@+id/dice_image"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/date_nights_logo"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/btn_randomize"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="16dp"/>
+
     <Button
         android:id="@+id/btn_randomize"
         android:layout_width="0dp"

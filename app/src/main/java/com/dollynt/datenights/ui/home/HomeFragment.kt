@@ -4,9 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.CheckBox
-import android.widget.ExpandableListView
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -17,11 +17,11 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.dollynt.datenights.R
-import com.dollynt.datenights.adapter.ExpandableListAdapter
 import com.dollynt.datenights.databinding.FragmentHomeBinding
 import com.dollynt.datenights.databinding.FragmentHomeNoCoupleBinding
 import com.dollynt.datenights.model.Option
 import com.dollynt.datenights.ui.couple.CoupleViewModel
+import com.dollynt.datenights.ui.result.ResultFragment
 import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment() {
@@ -138,7 +138,7 @@ class HomeFragment : Fragment() {
         btnRandomize.setOnClickListener {
             val selectedOptions = getSelectedOptions(dynamicOptionsContainer, options)
             if (selectedOptions.isNotEmpty()) {
-                randomizeOptions(selectedOptions)
+                navigateToResultScreen(selectedOptions)
             } else {
                 Toast.makeText(context, "Selecione pelo menos uma opção.", Toast.LENGTH_SHORT).show()
             }
@@ -160,11 +160,25 @@ class HomeFragment : Fragment() {
         return selectedOptions
     }
 
-    private fun randomizeOptions(selectedOptions: List<Option>) {
+    private fun navigateToResultScreen(selectedOptions: List<Option>) {
+        val diceImage = binding.root.findViewById<ImageView>(R.id.dice_image)
+        diceImage.visibility = View.VISIBLE
+
+        val rotateAnimation = AnimationUtils.loadAnimation(context, R.anim.rotation)
+        diceImage.startAnimation(rotateAnimation)
+
         binding.root.postDelayed({
-            val randomOption = selectedOptions.randomOrNull()?.name ?: "Nenhuma opção selecionada"
-            Toast.makeText(context, "Resultado: $randomOption", Toast.LENGTH_LONG).show()
-        }, 1000)
+            diceImage.clearAnimation()
+            diceImage.visibility = View.GONE
+
+            binding.root.removeAllViews()
+
+            val resultFragment = ResultFragment.newInstance(selectedOptions)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, resultFragment)
+                .commit()
+
+        }, 1500)
     }
 
     override fun onDestroyView() {
