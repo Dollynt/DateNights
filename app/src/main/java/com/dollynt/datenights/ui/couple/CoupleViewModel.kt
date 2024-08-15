@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.dollynt.datenights.model.Couple
 import com.dollynt.datenights.repository.CoupleRepository
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.auth.ktx.auth
@@ -21,13 +22,15 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
     val inviteLink: LiveData<String> = _inviteLink
     private val _inviteCode = MutableLiveData<String>()
     val inviteCode: LiveData<String> = _inviteCode
+    private val _couple = MutableLiveData<Couple?>()
+    val couple: LiveData<Couple?> = _couple
 
     fun createCouple(userId: String) {
         viewModelScope.launch {
             if (!repository.isUserInCouple(userId)) {
                 _isInCouple.value = repository.createCouple(userId)
                 if (_isInCouple.value == true) {
-                    generateInviteDetails()
+                    setupCouple()
                 }
             } else {
                 _isInCouple.value = true
@@ -40,7 +43,7 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
             val success = repository.joinCouple(userId, inviteCode)
             _isInCouple.value = success
             if (success) {
-                generateInviteDetails()
+                setupCouple()
             }
         }
     }
@@ -52,16 +55,18 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
             _isInCouple.value = false
             _inviteLink.value = ""
             _inviteCode.value = ""
+            _couple.value = null
         }
     }
 
-    private fun generateInviteDetails() {
+    private fun setupCouple() {
         viewModelScope.launch {
             val userId = Firebase.auth.currentUser?.uid ?: return@launch
             val couple = repository.getCoupleByUserId(userId)
             if (couple != null) {
                 _inviteLink.value = couple.inviteLink
                 _inviteCode.value = couple.inviteCode
+                _couple.value = couple
                 checkIfCoupleComplete(userId)
             }
         }
