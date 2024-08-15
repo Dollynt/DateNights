@@ -24,11 +24,17 @@ class CoupleRepository(context: Context) {
     suspend fun createCouple(userId: String): Boolean {
         val inviteCode = generateUniqueInviteCode()
         val couple = Couple(
+            id = "",
             users = listOf(userId),
             inviteCode = inviteCode,
             inviteLink = generateInviteLink(inviteCode)
         )
         val result = db.collection("couples").add(couple).await()
+        val coupleId = result.id
+
+        val updatedCouple = couple.copy(id = coupleId)
+        db.collection("couples").document(coupleId).set(updatedCouple).await()
+
         return result.id.isNotEmpty()
     }
 
