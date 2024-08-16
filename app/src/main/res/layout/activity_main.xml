@@ -8,7 +8,6 @@
 
     <FrameLayout
         android:id="@+id/nav_host_fragment"
-        android:padding="10dp"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
