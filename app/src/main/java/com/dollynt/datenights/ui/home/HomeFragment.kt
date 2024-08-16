@@ -4,15 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AnimationUtils
-import android.widget.Button
-import android.widget.CheckBox
 import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -21,7 +13,7 @@ import com.dollynt.datenights.databinding.FragmentHomeBinding
 import com.dollynt.datenights.databinding.FragmentHomeNoCoupleBinding
 import com.dollynt.datenights.model.Option
 import com.dollynt.datenights.ui.couple.CoupleViewModel
-import com.dollynt.datenights.ui.result.ResultFragment
+import com.dollynt.datenights.ui.selectOptions.SelectOptionsFragment
 import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment() {
@@ -37,9 +29,10 @@ class HomeFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View? {
-        coupleViewModel = ViewModelProvider(requireActivity()).get(CoupleViewModel::class.java)
-        homeViewModel = ViewModelProvider(requireActivity()).get(HomeViewModel::class.java)
+    ): View {
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        coupleViewModel = ViewModelProvider(requireActivity())[CoupleViewModel::class.java]
+        homeViewModel = ViewModelProvider(requireActivity())[HomeViewModel::class.java]
 
         coupleViewModel.isInCouple.observe(viewLifecycleOwner) { isCouple ->
             isInCouple = isCouple
@@ -69,8 +62,8 @@ class HomeFragment : Fragment() {
 
     private fun setupListeners() {
         binding.appOptionsButton.setOnClickListener {
-            lifecycleScope.launch {
-                homeViewModel.fetchOptions(1.toString())
+            viewLifecycleOwner.lifecycleScope.launch {
+                homeViewModel.fetchOptions("1")
                 homeViewModel.options.observe(viewLifecycleOwner) { options ->
                     showSelectOptionsScreen(options)
                 }
@@ -78,7 +71,7 @@ class HomeFragment : Fragment() {
         }
 
         binding.coupleOptionsButton.setOnClickListener {
-            lifecycleScope.launch {
+            viewLifecycleOwner.lifecycleScope.launch {
                 val coupleId = coupleViewModel.couple.value?.id.toString()
                 homeViewModel.fetchOptions(coupleId)
                 homeViewModel.options.observe(viewLifecycleOwner) { options ->
@@ -89,101 +82,19 @@ class HomeFragment : Fragment() {
     }
 
     private fun showSelectOptionsScreen(options: List<Option>) {
-        val inflater = LayoutInflater.from(context)
-        val selectOptionsView = inflater.inflate(R.layout.fragment_select_options, binding.root, false)
+        val fragmentContainer = view?.findViewById<FrameLayout>(R.id.fragment_container)
 
-        val dynamicOptionsContainer = selectOptionsView.findViewById<LinearLayout>(R.id.dynamic_options_container)
-        val btnRandomize = selectOptionsView.findViewById<Button>(R.id.btn_randomize)
-        val backIcon = selectOptionsView.findViewById<ImageView>(R.id.back_icon)
+        fragmentContainer?.removeAllViews()
 
-        // Configurando o botão de voltar
-        backIcon.setOnClickListener {
-            binding.root.removeAllViews()
-            updateLayout(LayoutInflater.from(context), binding.root as ViewGroup)
-        }
-
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            binding.root.removeAllViews()
-            updateLayout(LayoutInflater.from(context), binding.root as ViewGroup)
-        }
-
-        options.forEach { option ->
-            val optionView = inflater.inflate(R.layout.layout_option_item, dynamicOptionsContainer, false)
-            val checkBox = optionView.findViewById<CheckBox>(R.id.cb_option).apply {
-                text = option.name
-            }
-            val expandIcon = optionView.findViewById<ImageView>(R.id.expand_icon)
-            val subOptionsContainer = optionView.findViewById<LinearLayout>(R.id.sub_options_container)
-
-            option.subOptions.forEach { subOption ->
-                val subOptionView = inflater.inflate(android.R.layout.simple_list_item_1, subOptionsContainer, false)
-                val subOptionTextView = subOptionView.findViewById<TextView>(android.R.id.text1)
-                subOptionTextView.text = subOption
-                subOptionsContainer.addView(subOptionView)
-            }
-
-            expandIcon.setOnClickListener {
-                if (subOptionsContainer.visibility == View.GONE) {
-                    subOptionsContainer.visibility = View.VISIBLE
-                    expandIcon.setImageResource(R.drawable.ic_expand_less)
-                } else {
-                    subOptionsContainer.visibility = View.GONE
-                    expandIcon.setImageResource(R.drawable.ic_expand_more)
-                }
-            }
-
-            dynamicOptionsContainer.addView(optionView)
-        }
-
-        btnRandomize.setOnClickListener {
-            val selectedOptions = getSelectedOptions(dynamicOptionsContainer, options)
-            if (selectedOptions.isNotEmpty()) {
-                navigateToResultScreen(selectedOptions)
-            } else {
-                Toast.makeText(context, "Selecione pelo menos uma opção.", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        binding.root.removeAllViews()
-        binding.root.addView(selectOptionsView)
-    }
-
-    private fun getSelectedOptions(container: LinearLayout, options: List<Option>): List<Option> {
-        val selectedOptions = mutableListOf<Option>()
-        for (i in 0 until container.childCount) {
-            val optionView = container.getChildAt(i)
-            val checkBox = optionView.findViewById<CheckBox>(R.id.cb_option)
-            if (checkBox.isChecked) {
-                selectedOptions.add(options[i])
-            }
-        }
-        return selectedOptions
-    }
-
-    private fun navigateToResultScreen(selectedOptions: List<Option>) {
-        val diceImage = binding.root.findViewById<ImageView>(R.id.dice_image)
-        diceImage.visibility = View.VISIBLE
-
-        val rotateAnimation = AnimationUtils.loadAnimation(context, R.anim.rotation)
-        diceImage.startAnimation(rotateAnimation)
-
-        binding.root.postDelayed({
-            diceImage.clearAnimation()
-            diceImage.visibility = View.GONE
-
-            binding.root.removeAllViews()
-
-            val resultFragment = ResultFragment.newInstance(selectedOptions)
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, resultFragment)
-                .commit()
-
-        }, 1500)
+        val selectOptionsFragment = SelectOptionsFragment.newInstance(options)
+        requireActivity().supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, selectOptionsFragment)
+            .addToBackStack(null)
+            .commit()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        _bindingNoCouple = null
     }
 }

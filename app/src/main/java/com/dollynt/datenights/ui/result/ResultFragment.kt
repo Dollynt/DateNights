@@ -1,15 +1,20 @@
 package com.dollynt.datenights.ui.result
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.dollynt.datenights.R
 import com.dollynt.datenights.model.Option
+import com.dollynt.datenights.ui.home.HomeFragment
 
 class ResultFragment : Fragment() {
 
@@ -25,10 +30,20 @@ class ResultFragment : Fragment() {
         }
     }
 
+    @SuppressLint("MissingInflatedId")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_result, container, false)
+        val backIcon = view.findViewById<ImageView>(R.id.back_icon)
+
+        backIcon.setOnClickListener {
+            requireActivity().supportFragmentManager.popBackStack()
+        }
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            requireActivity().supportFragmentManager.popBackStack()
+        }
 
         val selectedOptions = arguments?.getSerializable(ARG_SELECTED_OPTIONS) as? List<Option>
 
@@ -44,13 +59,34 @@ class ResultFragment : Fragment() {
         val btnNotSatisfied = view.findViewById<Button>(R.id.btn_randomize_again)
 
         btnSatisfied.setOnClickListener {
-            requireActivity().supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            inflateHomeFragment()
         }
 
         btnNotSatisfied.setOnClickListener {
-            requireActivity().supportFragmentManager.popBackStack()
+            val diceImage = view.findViewById<ImageView>(R.id.dice_image)
+            diceImage.visibility = View.VISIBLE
+
+            val rotateAnimation = AnimationUtils.loadAnimation(context, R.anim.rotation)
+            diceImage.startAnimation(rotateAnimation)
+
+            view.postDelayed({
+                diceImage.clearAnimation()
+                diceImage.visibility = View.GONE
+
+                val updatedFragment = newInstance(selectedOptions!!)
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, updatedFragment)
+                    .commit()
+            }, 1500)
         }
 
         return view
+    }
+
+    private fun inflateHomeFragment() {
+        val homeFragment = HomeFragment()
+        requireActivity().supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, homeFragment)
+            .commit()
     }
 }
