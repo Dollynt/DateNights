@@ -120,17 +120,26 @@ class SelectOptionsFragment : Fragment() {
 
             val resultFragment = ResultFragment.newInstance(selectedOptions)
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, resultFragment)
+                .setCustomAnimations(
+                    R.anim.slide_in_right,
+                    R.anim.slide_out_left,
+                    R.anim.slide_in_left,
+                    R.anim.slide_out_right
+                )
                 .addToBackStack(null)
+                .replace(R.id.fragment_container, resultFragment)
                 .commit()
 
         }, 1500)
 
     }
     private fun inflateHomeFragment() {
-        val homeFragment = HomeFragment()
         requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, homeFragment)
+            .setCustomAnimations(
+                R.anim.slide_in_left,
+                R.anim.slide_out_right
+            )
+            .replace(R.id.fragment_container, HomeFragment())
             .commit()
     }
 

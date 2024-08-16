@@ -88,6 +88,12 @@ class HomeFragment : Fragment() {
 
         val selectOptionsFragment = SelectOptionsFragment.newInstance(options)
         requireActivity().supportFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                R.anim.slide_in_right,
+                R.anim.slide_out_left,
+                R.anim.slide_in_left,
+                R.anim.slide_out_right
+            )
             .replace(R.id.fragment_container, selectOptionsFragment)
             .addToBackStack(null)
             .commit()

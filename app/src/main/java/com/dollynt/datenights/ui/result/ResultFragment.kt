@@ -30,7 +30,6 @@ class ResultFragment : Fragment() {
         }
     }
 
-    @SuppressLint("MissingInflatedId")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
@@ -47,13 +46,7 @@ class ResultFragment : Fragment() {
 
         val selectedOptions = arguments?.getSerializable(ARG_SELECTED_OPTIONS) as? List<Option>
 
-        val resultMessage = selectedOptions?.joinToString(separator = "\n") { option ->
-            val randomSubOption = option.subOptions.randomOrNull() ?: "Nenhuma opção selecionada"
-            "${option.name}: $randomSubOption"
-        } ?: "Nenhuma opção selecionada"
-
-        val resultText = view.findViewById<TextView>(R.id.result_text)
-        resultText.text = resultMessage
+        randomizeOptions(selectedOptions, view)
 
         val btnSatisfied = view.findViewById<Button>(R.id.btn_confirm)
         val btnNotSatisfied = view.findViewById<Button>(R.id.btn_randomize_again)
@@ -73,20 +66,30 @@ class ResultFragment : Fragment() {
                 diceImage.clearAnimation()
                 diceImage.visibility = View.GONE
 
-                val updatedFragment = newInstance(selectedOptions!!)
-                requireActivity().supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, updatedFragment)
-                    .commit()
+                randomizeOptions(selectedOptions, view)
             }, 1500)
         }
 
         return view
     }
 
+    private fun randomizeOptions(selectedOptions: List<Option>?, view: View) {
+        val resultMessage = selectedOptions?.joinToString(separator = "\n") { option ->
+            val randomSubOption = option.subOptions.randomOrNull() ?: "Nenhuma opção selecionada"
+            "${option.name}: $randomSubOption"
+        } ?: "Nenhuma opção selecionada"
+
+        val resultText = view.findViewById<TextView>(R.id.result_text)
+        resultText.text = resultMessage
+    }
+
     private fun inflateHomeFragment() {
-        val homeFragment = HomeFragment()
         requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, homeFragment)
+            .setCustomAnimations(
+                R.anim.slide_in_left,
+                R.anim.slide_out_right
+            )
+            .replace(R.id.fragment_container, HomeFragment())
             .commit()
     }
 }
