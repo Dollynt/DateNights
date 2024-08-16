@@ -1,3 +1,5 @@
+// CoupleRepository.kt
+
 package com.dollynt.datenights.repository
 
 import android.content.Context
@@ -7,112 +9,167 @@ import com.google.firebase.dynamiclinks.DynamicLink
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FieldValue
-import kotlinx.coroutines.tasks.await
 
 class CoupleRepository(context: Context) {
 
     private val db = FirebaseFirestore.getInstance()
 
-    suspend fun isUserInCouple(userId: String): Boolean {
-        val snapshot = db.collection("couples")
+    fun isUserInCouple(userId: String, onComplete: (Boolean) -> Unit, onError: (Exception) -> Unit) {
+        db.collection("couples")
             .whereArrayContains("users", userId)
             .get()
-            .await()
-        return snapshot.documents.isNotEmpty()
+            .addOnSuccessListener { snapshot ->
+                onComplete(snapshot.documents.isNotEmpty())
+            }
+            .addOnFailureListener { exception ->
+                onError(exception)
+            }
     }
 
-    suspend fun createCouple(userId: String): Boolean {
-        val inviteCode = generateUniqueInviteCode()
-        val couple = Couple(
-            id = "",
-            users = listOf(userId),
-            inviteCode = inviteCode,
-            inviteLink = generateInviteLink(inviteCode)
-        )
-        val result = db.collection("couples").add(couple).await()
-        val coupleId = result.id
-
-        val updatedCouple = couple.copy(id = coupleId)
-        db.collection("couples").document(coupleId).set(updatedCouple).await()
-
-        return result.id.isNotEmpty()
+    fun createCouple(userId: String, onComplete: (Boolean) -> Unit, onError: (Exception) -> Unit) {
+        isUserInCouple(userId, { isInCouple ->
+            if (isInCouple) {
+                onError(Exception("User is already in a couple"))
+            } else {
+                val inviteCode = generateUniqueInviteCode()
+                generateInviteLink(inviteCode) { link ->
+                    val couple = Couple(
+                        id = "",
+                        users = listOf(userId),
+                        inviteCode = inviteCode,
+                        inviteLink = link
+                    )
+                    db.collection("couples").add(couple)
+                        .addOnSuccessListener { result ->
+                            val coupleId = result.id
+                            val updatedCouple = couple.copy(id = coupleId)
+                            db.collection("couples").document(coupleId).set(updatedCouple)
+                                .addOnSuccessListener {
+                                    onComplete(result.id.isNotEmpty())
+                                }
+                                .addOnFailureListener { exception ->
+                                    onError(exception)
+                                }
+                        }
+                        .addOnFailureListener { exception ->
+                            onError(exception)
+                        }
+                }
+            }
+        }, onError)
     }
 
-    suspend fun joinCouple(userId: String, inviteCode: String): Boolean {
-        val snapshot = db.collection("couples")
+    fun joinCouple(userId: String, inviteCode: String, onComplete: (Boolean) -> Unit, onError: (Exception) -> Unit) {
+        isUserInCouple(userId, { isInCouple ->
+            if (isInCouple) {
+                onError(Exception("User is already in a couple"))
+            } else {
+                isCoupleComplete(inviteCode, { isComplete ->
+                    if (isComplete) {
+                        onError(Exception("Couple is complete"))
+                    } else {
+                        db.collection("couples")
+                            .whereEqualTo("inviteCode", inviteCode)
+                            .get()
+                            .addOnSuccessListener { snapshot ->
+                                if (snapshot.documents.isNotEmpty()) {
+                                    val coupleId = snapshot.documents[0].id
+                                    db.collection("couples").document(coupleId)
+                                        .update("users", FieldValue.arrayUnion(userId))
+                                        .addOnSuccessListener {
+                                            onComplete(true)
+                                        }
+                                        .addOnFailureListener { exception ->
+                                            onError(exception)
+                                        }
+                                } else {
+                                    onComplete(false)
+                                }
+                            }
+                            .addOnFailureListener { exception ->
+                                onError(exception)
+                            }
+                    }
+                }, onError)
+            }
+        }, onError)
+    }
+
+    fun deleteCouple(userId: String, onComplete: () -> Unit, onError: (Exception) -> Unit) {
+        db.collection("couples")
+            .whereArrayContains("users", userId)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                if (snapshot.documents.isNotEmpty()) {
+                    val coupleId = snapshot.documents[0].id
+                    db.collection("couples").document(coupleId).delete()
+                        .addOnSuccessListener {
+                            onComplete()
+                        }
+                        .addOnFailureListener { exception ->
+                            onError(exception)
+                        }
+                } else {
+                    onComplete()
+                }
+            }
+            .addOnFailureListener { exception ->
+                onError(exception)
+            }
+    }
+
+    fun getCoupleByUserId(userId: String, onComplete: (Couple?) -> Unit, onError: (Exception) -> Unit) {
+        db.collection("couples")
+            .whereArrayContains("users", userId)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val couple = if (snapshot.documents.isNotEmpty()) {
+                    snapshot.documents[0].toObject(Couple::class.java)
+                } else {
+                    null
+                }
+                onComplete(couple)
+            }
+            .addOnFailureListener { exception ->
+                onError(exception)
+            }
+    }
+
+    fun isCoupleComplete(inviteCode: String, onComplete: (Boolean) -> Unit, onError: (Exception) -> Unit) {
+        db.collection("couples")
             .whereEqualTo("inviteCode", inviteCode)
             .get()
-            .await()
-        if (snapshot.documents.isNotEmpty()) {
-            val coupleId = snapshot.documents[0].id
-            db.collection("couples").document(coupleId)
-                .update("users", FieldValue.arrayUnion(userId))
-                .await()
-            return true
-        }
-        return false
-    }
-
-    suspend fun deleteCouple(userId: String) {
-        val snapshot = db.collection("couples")
-            .whereArrayContains("users", userId)
-            .get()
-            .await()
-        if (snapshot.documents.isNotEmpty()) {
-            val coupleId = snapshot.documents[0].id
-            db.collection("couples").document(coupleId).delete().await()
-        }
-    }
-
-    suspend fun getCoupleByUserId(userId: String): Couple? {
-        val snapshot = db.collection("couples")
-            .whereArrayContains("users", userId)
-            .get()
-            .await()
-        return if (snapshot.documents.isNotEmpty()) {
-            snapshot.documents[0].toObject(Couple::class.java)
-        } else {
-            null
-        }
-    }
-
-    suspend fun isCoupleComplete(userId: String): Boolean {
-        val couple = getCoupleByUserId(userId)
-        return couple?.users?.size == 2
-    }
-
-    private suspend fun generateUniqueInviteCode(): String {
-        val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
-        var inviteCode: String
-        var isUnique = false
-
-        while (!isUnique) {
-            inviteCode = (1..8).map { chars.random() }.joinToString("")
-            val snapshot = db.collection("couples")
-                .whereEqualTo("inviteCode", inviteCode)
-                .get()
-                .await()
-            if (snapshot.documents.isEmpty()) {
-                isUnique = true
-                return inviteCode
+            .addOnSuccessListener { snapshot ->
+                val isComplete = snapshot.documents.isNotEmpty() && snapshot.documents[0].get("users")?.let {
+                    (it as List<*>).size == 2
+                } ?: false
+                onComplete(isComplete)
             }
-        }
-        throw Exception("Unable to generate a unique invite code")
+            .addOnFailureListener { exception ->
+                onError(exception)
+            }
     }
 
-    private suspend fun generateInviteLink(inviteCode: String): String {
-        val dynamicLink = FirebaseDynamicLinks.getInstance().createDynamicLink()
+    private fun generateUniqueInviteCode(): String {
+        val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
+        return (1..8).map { chars.random() }.joinToString("")
+    }
+
+    private fun generateInviteLink(inviteCode: String, onComplete: (String) -> Unit) {
+        FirebaseDynamicLinks.getInstance().createDynamicLink()
             .setLink(Uri.parse("https://datenights.page.link/invite?inviteCode=$inviteCode"))
             .setDomainUriPrefix("https://datenights.page.link")
             .setAndroidParameters(
-                DynamicLink.AndroidParameters.Builder("com.dollynt.datenights") // Especifique o nome do pacote aqui
+                DynamicLink.AndroidParameters.Builder("com.dollynt.datenights")
                     .setFallbackUrl(Uri.parse("https://play.google.com/store/apps/details?id=com.dollynt.datenights"))
                     .build()
             )
             .buildShortDynamicLink()
-            .await()
-
-        return dynamicLink.shortLink.toString()
+            .addOnSuccessListener { dynamicLink ->
+                onComplete(dynamicLink.shortLink.toString())
+            }
+            .addOnFailureListener { exception ->
+                onComplete("")
+            }
     }
-
 }

@@ -44,10 +44,16 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     fun joinCouple(userId: String, inviteCode: String) {
         viewModelScope.launch {
-            val success = repository.joinCouple(userId, inviteCode)
-            if (!success) {
-                _errorMessage.postValue("Failed to join couple")
-            }
+            repository.joinCouple(userId, inviteCode,
+                onComplete = { success ->
+                    if (!success) {
+                        _errorMessage.postValue("Failed to join couple")
+                    }
+                },
+                onError = { exception ->
+                    _errorMessage.postValue(exception.message)
+                }
+            )
         }
     }
 }

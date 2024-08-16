@@ -1,6 +1,7 @@
 package com.dollynt.datenights.ui.couple
 
 import android.app.Application
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -15,80 +16,112 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
 
     private val repository = CoupleRepository(application)
     private val _isInCouple = MutableLiveData<Boolean>()
-    val isInCouple: LiveData<Boolean> = _isInCouple
+    val isInCouple: LiveData<Boolean> get() = _isInCouple
     private val _isCoupleComplete = MutableLiveData<Boolean>()
-    val isCoupleComplete: LiveData<Boolean> = _isCoupleComplete
+    val isCoupleComplete: LiveData<Boolean> get() = _isCoupleComplete
     private val _inviteLink = MutableLiveData<String>()
-    val inviteLink: LiveData<String> = _inviteLink
+    val inviteLink: LiveData<String> get() = _inviteLink
     private val _inviteCode = MutableLiveData<String>()
-    val inviteCode: LiveData<String> = _inviteCode
+    val inviteCode: LiveData<String> get() = _inviteCode
     private val _couple = MutableLiveData<Couple?>()
-    val couple: LiveData<Couple?> = _couple
+    val couple: LiveData<Couple?> get() = _couple
 
     fun createCouple(userId: String) {
         viewModelScope.launch {
-            if (!repository.isUserInCouple(userId)) {
-                _isInCouple.value = repository.createCouple(userId)
-                if (_isInCouple.value == true) {
-                    setupCouple()
+            repository.isUserInCouple(userId, { isInCouple ->
+                if (!isInCouple) {
+                    repository.createCouple(userId, { success ->
+                        _isInCouple.postValue(success)
+                        if (success) {
+                            setupCouple()
+                        }
+                    }, { exception ->
+                        handleException(exception)
+                    })
+                } else {
+                    _isInCouple.postValue(true)
                 }
-            } else {
-                _isInCouple.value = true
-            }
+            }, { exception ->
+                handleException(exception)
+            })
         }
     }
 
     fun joinCouple(userId: String, inviteCode: String) {
         viewModelScope.launch {
-            val success = repository.joinCouple(userId, inviteCode)
-            _isInCouple.value = success
-            if (success) {
-                setupCouple()
-            }
+            repository.joinCouple(userId, inviteCode,
+                onComplete = { success ->
+                    if (success) {
+                        setupCouple()
+                    } else {
+                        Toast.makeText(getApplication(), "Failed to join couple", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                onError = { exception ->
+                    handleException(exception)
+                }
+            )
         }
     }
 
     fun deleteCouple(userId: String) {
         viewModelScope.launch {
-            repository.deleteCouple(userId)
-            _isCoupleComplete.value = false
-            _isInCouple.value = false
-            _inviteLink.value = ""
-            _inviteCode.value = ""
-            _couple.value = null
+            repository.deleteCouple(userId, {
+                _isCoupleComplete.postValue(false)
+                _isInCouple.postValue(false)
+                _inviteLink.postValue("")
+                _inviteCode.postValue("")
+                _couple.postValue(null)
+            }, { exception ->
+                handleException(exception)
+            })
         }
     }
 
     private fun setupCouple() {
         viewModelScope.launch {
             val userId = Firebase.auth.currentUser?.uid ?: return@launch
-            val couple = repository.getCoupleByUserId(userId)
-            if (couple != null) {
-                _inviteLink.value = couple.inviteLink
-                _inviteCode.value = couple.inviteCode
-                _couple.value = couple
-                checkIfCoupleComplete(userId)
-            }
+            repository.getCoupleByUserId(userId, { couple ->
+                couple?.let {
+                    _inviteLink.postValue(it.inviteLink)
+                    _inviteCode.postValue(it.inviteCode)
+                    _couple.postValue(it)
+                    checkIfCoupleComplete(userId)
+                }
+            }, { exception ->
+                handleException(exception)
+            })
         }
     }
 
     fun checkCoupleStatus(userId: String? = Firebase.auth.currentUser?.uid) {
         userId?.let {
             viewModelScope.launch {
-                val couple = repository.getCoupleByUserId(it)
-                _isInCouple.value = couple != null
-                if (couple != null) {
-                    _inviteLink.value = "https://datenights.app/invite?code=${couple.inviteCode}"
-                    _inviteCode.value = couple.inviteCode
-                    checkIfCoupleComplete(it)
-                }
+                repository.getCoupleByUserId(it, { couple ->
+                    _isInCouple.postValue(couple != null)
+                    couple?.let {
+                        _inviteLink.postValue(it.inviteLink)
+                        _inviteCode.postValue(it.inviteCode)
+                        checkIfCoupleComplete(it.id)
+                    }
+                }, { exception ->
+                    handleException(exception)
+                })
             }
         }
     }
 
     private fun checkIfCoupleComplete(userId: String) {
         viewModelScope.launch {
-            _isCoupleComplete.value = repository.isCoupleComplete(userId)
+            repository.isCoupleComplete(userId, { isComplete ->
+                _isCoupleComplete.postValue(isComplete)
+            }, { exception ->
+                handleException(exception)
+            })
         }
+    }
+
+    private fun handleException(exception: Exception) {
+        Toast.makeText(getApplication(), exception.message, Toast.LENGTH_SHORT).show()
     }
 }

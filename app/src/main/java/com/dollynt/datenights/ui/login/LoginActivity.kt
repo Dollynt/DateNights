@@ -2,7 +2,6 @@ package com.dollynt.datenights.ui.login
 
 import LoginViewModel
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -15,9 +14,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.dynamiclinks.ktx.dynamicLinks
-import com.google.firebase.ktx.Firebase
 
 class LoginActivity : AppCompatActivity() {
 
@@ -30,17 +26,9 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Redireciona para MainActivity se o usuário estiver autenticado
-        if (Firebase.auth.currentUser != null) {
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            finish()
-            return
-        }
+        viewModel = ViewModelProvider(this)[LoginViewModel::class.java]
 
-        viewModel = ViewModelProvider(this).get(LoginViewModel::class.java)
-
-        handleDynamicLink(intent)
+        inviteCode = intent.getStringExtra("inviteCode")
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
@@ -55,7 +43,7 @@ class LoginActivity : AppCompatActivity() {
         }
 
         binding.emailSignInButton.setOnClickListener {
-            val email = binding.username.text.toString()
+            val email = binding.email.text.toString()
             val password = binding.password.text.toString()
             if (email.isNotEmpty() && password.isNotEmpty()) {
                 viewModel.signInWithEmailAndPassword(email, password)
@@ -64,9 +52,10 @@ class LoginActivity : AppCompatActivity() {
             }
         }
 
-        binding.registerTextView.setOnClickListener {
-            val intent = Intent(this, RegisterActivity::class.java)
-            intent.putExtra("inviteCode", inviteCode)
+        binding.register.setOnClickListener {
+            val intent = Intent(this, RegisterActivity::class.java).apply {
+                putExtra("inviteCode", inviteCode)
+            }
             startActivity(intent)
         }
 
@@ -89,21 +78,7 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        handleDynamicLink(intent)
-    }
-
-    private fun handleDynamicLink(intent: Intent) {
-        Firebase.dynamicLinks
-            .getDynamicLink(intent)
-            .addOnSuccessListener(this) { pendingDynamicLinkData ->
-                if (pendingDynamicLinkData != null) {
-                    val deepLink: Uri? = pendingDynamicLinkData.link
-                    inviteCode = deepLink?.getQueryParameter("inviteCode")
-                }
-            }
-            .addOnFailureListener(this) {
-                Snackbar.make(binding.root, "Failed to retrieve dynamic link", Snackbar.LENGTH_SHORT).show()
-            }
+        inviteCode = intent.getStringExtra("inviteCode")
     }
 
     private val launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->

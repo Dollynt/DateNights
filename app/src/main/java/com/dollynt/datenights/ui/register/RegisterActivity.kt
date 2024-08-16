@@ -23,20 +23,12 @@ class RegisterActivity : AppCompatActivity() {
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Redireciona para MainActivity se o usuário estiver autenticado
-        if (Firebase.auth.currentUser != null) {
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            finish()
-            return
-        }
-
         viewModel = ViewModelProvider(this).get(RegisterViewModel::class.java)
 
         inviteCode = intent.getStringExtra("inviteCode")
 
         binding.registerButton.setOnClickListener {
-            val email = binding.username.text.toString()
+            val email = binding.email.text.toString()
             val password = binding.password.text.toString()
             if (email.isNotEmpty() && password.isNotEmpty()) {
                 viewModel.registerWithEmailAndPassword(email, password)
@@ -45,7 +37,7 @@ class RegisterActivity : AppCompatActivity() {
             }
         }
 
-        binding.loginTextView.setOnClickListener {
+        binding.loginTextViewContainer.setOnClickListener {
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
             finish()

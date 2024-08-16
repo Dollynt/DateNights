@@ -20,8 +20,8 @@ class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private var _bindingNoCouple: FragmentHomeNoCoupleBinding? = null
-    private val binding get() = _binding!!
-    private val bindingNoCouple get() = _bindingNoCouple!!
+    private val binding get() = _binding
+    private val bindingNoCouple get() = _bindingNoCouple
 
     private lateinit var coupleViewModel: CoupleViewModel
     private lateinit var homeViewModel: HomeViewModel
@@ -29,7 +29,7 @@ class HomeFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
+    ): View? {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         coupleViewModel = ViewModelProvider(requireActivity())[CoupleViewModel::class.java]
         homeViewModel = ViewModelProvider(requireActivity())[HomeViewModel::class.java]
@@ -39,7 +39,7 @@ class HomeFragment : Fragment() {
             updateLayout(inflater, container)
         }
 
-        return inflater.inflate(R.layout.fragment_home_placeholder, container, false)
+        return binding?.root
     }
 
     private fun updateLayout(inflater: LayoutInflater, container: ViewGroup?) {
@@ -49,11 +49,11 @@ class HomeFragment : Fragment() {
             _bindingNoCouple = null
             _binding = FragmentHomeBinding.inflate(inflater, container, false)
             setupListeners()
-            binding.root
+            binding?.root
         } else {
             _binding = null
             _bindingNoCouple = FragmentHomeNoCoupleBinding.inflate(inflater, container, false)
-            bindingNoCouple.root
+            bindingNoCouple?.root
         }
 
         fragmentContainer?.removeAllViews()
@@ -61,7 +61,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupListeners() {
-        binding.appOptionsButton.setOnClickListener {
+        binding?.appOptionsButton?.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launch {
                 homeViewModel.fetchOptions("1")
                 homeViewModel.options.observe(viewLifecycleOwner) { options ->
@@ -70,7 +70,7 @@ class HomeFragment : Fragment() {
             }
         }
 
-        binding.coupleOptionsButton.setOnClickListener {
+        binding?.coupleOptionsButton?.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launch {
                 val coupleId = coupleViewModel.couple.value?.id.toString()
                 homeViewModel.fetchOptions(coupleId)
@@ -102,5 +102,6 @@ class HomeFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        _bindingNoCouple = null
     }
 }
