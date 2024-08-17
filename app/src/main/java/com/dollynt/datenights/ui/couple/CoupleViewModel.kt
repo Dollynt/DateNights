@@ -85,6 +85,7 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
                 couple?.let {
                     _inviteLink.postValue(it.inviteLink)
                     _inviteCode.postValue(it.inviteCode)
+                    _isInCouple.postValue(true)
                     _couple.postValue(it)
                     checkIfCoupleComplete(userId)
                 }
@@ -102,7 +103,7 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
                     couple?.let {
                         _inviteLink.postValue(it.inviteLink)
                         _inviteCode.postValue(it.inviteCode)
-                        checkIfCoupleComplete(it.id)
+                        checkIfCoupleComplete(userId)
                     }
                 }, { exception ->
                     handleException(exception)

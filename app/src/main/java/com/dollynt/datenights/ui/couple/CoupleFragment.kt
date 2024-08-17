@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -33,13 +34,19 @@ class CoupleFragment : Fragment() {
         _binding = FragmentCoupleBinding.inflate(inflater, container, false)
         viewModel = ViewModelProvider(requireActivity()).get(CoupleViewModel::class.java)
 
-        viewModel.checkCoupleStatus(Firebase.auth.currentUser?.uid)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         viewModel.isInCouple.observe(viewLifecycleOwner) { isInCouple ->
             updateLayout(isInCouple)
         }
 
-        return binding.root
+        viewModel.isCoupleComplete.observe(viewLifecycleOwner) { isCoupleComplete ->
+            handleCoupleComplete(isCoupleComplete)
+        }
     }
 
     private fun updateLayout(isInCouple: Boolean) {
@@ -48,16 +55,21 @@ class CoupleFragment : Fragment() {
 
         contentFrame.removeAllViews()
 
-        if (isInCouple) {
-            viewModel.isCoupleComplete.observe(viewLifecycleOwner) { isCoupleComplete ->
-                if (isCoupleComplete) {
-                    showCoupleComplete(layoutInflater, contentFrame)
-                } else {
-                    showInviteOptions(layoutInflater, contentFrame)
-                }
-            }
-        } else {
+        if (!isInCouple) {
             showCreateOrJoinCouple(layoutInflater, contentFrame)
+        }
+    }
+
+    private fun handleCoupleComplete(isCoupleComplete: Boolean) {
+        val contentFrame = binding.coupleContentFrame
+        val layoutInflater = LayoutInflater.from(context)
+
+        contentFrame.removeAllViews()
+
+        if (isCoupleComplete) {
+            showCoupleComplete(layoutInflater, contentFrame)
+        } else {
+            showInviteOptions(layoutInflater, contentFrame)
         }
     }
 
@@ -72,10 +84,6 @@ class CoupleFragment : Fragment() {
 
         val inviteLinkTextView = inviteOptionsView.findViewById<TextView>(R.id.inviteLinkTextView)
         val inviteCodeTextView = inviteOptionsView.findViewById<TextView>(R.id.inviteCodeTextView)
-        val copyLinkButton = inviteOptionsView.findViewById<ImageButton>(R.id.copyLinkButton)
-        val shareLinkButton = inviteOptionsView.findViewById<ImageButton>(R.id.shareLinkButton)
-        val copyCodeButton = inviteOptionsView.findViewById<ImageButton>(R.id.copyCodeButton)
-        val deleteCoupleButton = inviteOptionsView.findViewById<Button>(R.id.deleteCoupleButton)
 
         viewModel.inviteLink.observe(viewLifecycleOwner) { inviteLink ->
             inviteLinkTextView.text = inviteLink
@@ -84,6 +92,11 @@ class CoupleFragment : Fragment() {
         viewModel.inviteCode.observe(viewLifecycleOwner) { inviteCode ->
             inviteCodeTextView.text = inviteCode
         }
+
+        val copyLinkButton = inviteOptionsView.findViewById<ImageButton>(R.id.copyLinkButton)
+        val shareLinkButton = inviteOptionsView.findViewById<ImageButton>(R.id.shareLinkButton)
+        val copyCodeButton = inviteOptionsView.findViewById<ImageButton>(R.id.copyCodeButton)
+        val deleteCoupleButton = inviteOptionsView.findViewById<Button>(R.id.deleteCoupleButton)
 
         copyLinkButton.setOnClickListener {
             copyToClipboard(inviteLinkTextView.text.toString(), "Link copiado!")
@@ -120,6 +133,12 @@ class CoupleFragment : Fragment() {
 
             val joinCoupleButton = joinCoupleView.findViewById<Button>(R.id.joinCoupleButton)
             val joinCoupleCodeInput = joinCoupleView.findViewById<EditText>(R.id.joinCoupleCodeInput)
+            val backIcon = joinCoupleView.findViewById<ImageView>(R.id.back_icon)
+
+            backIcon.setOnClickListener {
+                contentFrame.removeAllViews()
+                showCreateOrJoinCouple(layoutInflater, contentFrame)
+            }
 
             joinCoupleButton.setOnClickListener {
                 val code = joinCoupleCodeInput.text.toString()

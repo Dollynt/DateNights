@@ -64,7 +64,7 @@ class CoupleRepository(context: Context) {
             if (isInCouple) {
                 onError(Exception("User is already in a couple"))
             } else {
-                isCoupleComplete(inviteCode, { isComplete ->
+                isCoupleComplete(userId, { isComplete ->
                     if (isComplete) {
                         onError(Exception("Couple is complete"))
                     } else {
@@ -135,15 +135,23 @@ class CoupleRepository(context: Context) {
             }
     }
 
-    fun isCoupleComplete(inviteCode: String, onComplete: (Boolean) -> Unit, onError: (Exception) -> Unit) {
+    fun isCoupleComplete(userId: String, onComplete: (Boolean) -> Unit, onError: (Exception) -> Unit) {
         db.collection("couples")
-            .whereEqualTo("inviteCode", inviteCode)
+            .whereArrayContains("users", userId)
             .get()
             .addOnSuccessListener { snapshot ->
-                val isComplete = snapshot.documents.isNotEmpty() && snapshot.documents[0].get("users")?.let {
-                    (it as List<*>).size == 2
-                } ?: false
-                onComplete(isComplete)
+                if (snapshot.documents.isNotEmpty()) {
+                    val document = snapshot.documents[0]
+                    val users = document.get("users")
+                    if (users is List<*>) {
+                        val isComplete = users.size == 2
+                        onComplete(isComplete)
+                    } else {
+                        onComplete(false)
+                    }
+                } else {
+                    onComplete(false)
+                }
             }
             .addOnFailureListener { exception ->
                 onError(exception)
