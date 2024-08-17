@@ -34,4 +34,14 @@
     <string name="copy_code">code</string>
     <string name="copy_link">link</string>
     <string name="share_link">link</string>
+    <string name="profile_image">Imagem de perfil</string>
+    <string name="label_name">Nome</string>
+    <string name="hint_name">Nome</string>
+    <string name="label_gender">Gênero</string>
+    <string name="label_age">Data de Nascimento\n</string>
+    <string name="hint_age">data</string>
+    <string name="edit_image">Editar imagem</string>
+    <string name="label_birthdate">Data de Nascimento</string>
+    <string name="hint_birthdate">dd/mm/YYYY</string>
+    <string name="button_save">Salvar</string>
 </resources>

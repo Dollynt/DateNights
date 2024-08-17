@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.result.ResultFragment"
+    tools:context=".ui.home.ResultFragment"
     android:padding="10dp">
 
     <ImageView

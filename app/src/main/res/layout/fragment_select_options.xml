@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="10dp"
-    tools:context=".ui.selectOptions.SelectOptionsFragment">
+    tools:context=".ui.home.SelectOptionsFragment">
 
     <ImageView
         android:id="@+id/back_icon"

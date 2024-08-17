@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.dollynt.datenights.R
 import com.dollynt.datenights.databinding.FragmentProfileBinding
 import com.dollynt.datenights.ui.login.LoginActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -26,8 +27,13 @@ class ProfileFragment : Fragment() {
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
 
         binding.buttonSettings.setOnClickListener {
-            // Ação para configurações
+            binding.fragmentProfile.removeAllViews()
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_profile, EditProfileFragment())
+                .addToBackStack(null)
+                .commit()
         }
+
         binding.buttonLogout.setOnClickListener {
             logoutUser()
         }
