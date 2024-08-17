@@ -26,10 +26,9 @@ class EditProfileFragment : Fragment() {
     ): View {
         _binding = FragmentEditProfileBinding.inflate(inflater, container, false)
 
-        // Carregar dados do usuário
         loadUserData()
 
-        binding.backIcon.setOnClickListener() {
+        binding.backIcon.setOnClickListener {
             goBackToProfileFragment()
         }
 
@@ -51,11 +50,12 @@ class EditProfileFragment : Fragment() {
     }
 
     private fun goBackToProfileFragment() {
-        // Cria uma nova instância do ProfileFragment
         val profileFragment = ProfileFragment()
-
-        // Realiza a transação de fragmento para substituir o EditProfileFragment pelo ProfileFragment
         parentFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                R.anim.slide_in_left,
+                R.anim.slide_out_right
+            )
             .replace(R.id.fragment_profile, profileFragment)
             .commit()
     }
@@ -91,10 +91,6 @@ class EditProfileFragment : Fragment() {
 
     private fun loadUserData() {
         // Carregar os dados do usuário para preencher os campos
-        // Exemplo:
-        // binding.editTextName.setText(user.name)
-        // binding.spinnerGender.setSelection(...)
-        // binding.editTextBirthdate.setText(user.birthdate)
     }
 
     private fun saveUserData() {
@@ -106,8 +102,6 @@ class EditProfileFragment : Fragment() {
             Toast.makeText(context, "Por favor, preencha todos os campos corretamente", Toast.LENGTH_SHORT).show()
         } else {
             // Salvar os dados do usuário
-            // Exemplo:
-            // user.updateProfile(name, gender, birthdate)
             Toast.makeText(context, "Informações atualizadas com sucesso!", Toast.LENGTH_SHORT).show()
         }
     }

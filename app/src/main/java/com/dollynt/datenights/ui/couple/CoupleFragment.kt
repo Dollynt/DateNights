@@ -6,6 +6,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.transition.TransitionManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -117,6 +118,10 @@ class CoupleFragment : Fragment() {
 
     private fun showCreateOrJoinCouple(layoutInflater: LayoutInflater, contentFrame: ViewGroup) {
         val createOrJoinView = layoutInflater.inflate(R.layout.view_create_or_join_couple, contentFrame, false)
+
+        // Usando TransitionManager para aplicar animações entre as transições de layout
+        TransitionManager.beginDelayedTransition(contentFrame)
+        contentFrame.removeAllViews()
         contentFrame.addView(createOrJoinView)
 
         val createCoupleButton = createOrJoinView.findViewById<Button>(R.id.createCoupleButton)
@@ -127,23 +132,30 @@ class CoupleFragment : Fragment() {
         }
 
         showJoinCoupleLayoutButton.setOnClickListener {
-            val joinCoupleView = layoutInflater.inflate(R.layout.view_join_couple, contentFrame, false)
-            contentFrame.removeAllViews()
-            contentFrame.addView(joinCoupleView)
+            showJoinCoupleScreen(layoutInflater, contentFrame)
+        }
+    }
 
-            val joinCoupleButton = joinCoupleView.findViewById<Button>(R.id.joinCoupleButton)
-            val joinCoupleCodeInput = joinCoupleView.findViewById<EditText>(R.id.joinCoupleCodeInput)
-            val backIcon = joinCoupleView.findViewById<ImageView>(R.id.back_icon)
+    private fun showJoinCoupleScreen(layoutInflater: LayoutInflater, contentFrame: ViewGroup) {
+        val joinCoupleView = layoutInflater.inflate(R.layout.view_join_couple, contentFrame, false)
 
-            backIcon.setOnClickListener {
-                contentFrame.removeAllViews()
-                showCreateOrJoinCouple(layoutInflater, contentFrame)
-            }
+        // Usando TransitionManager para aplicar animações entre as transições de layout
+        TransitionManager.beginDelayedTransition(contentFrame)
+        contentFrame.removeAllViews()
+        contentFrame.addView(joinCoupleView)
 
-            joinCoupleButton.setOnClickListener {
-                val code = joinCoupleCodeInput.text.toString()
-                viewModel.joinCouple(Firebase.auth.currentUser?.uid ?: "", code)
-            }
+        val joinCoupleButton = joinCoupleView.findViewById<Button>(R.id.joinCoupleButton)
+        val joinCoupleCodeInput = joinCoupleView.findViewById<EditText>(R.id.joinCoupleCodeInput)
+        val backIcon = joinCoupleView.findViewById<ImageView>(R.id.back_icon)
+
+        backIcon.setOnClickListener {
+            TransitionManager.beginDelayedTransition(contentFrame)
+            showCreateOrJoinCouple(layoutInflater, contentFrame)
+        }
+
+        joinCoupleButton.setOnClickListener {
+            val code = joinCoupleCodeInput.text.toString()
+            viewModel.joinCouple(Firebase.auth.currentUser?.uid ?: "", code)
         }
     }
 
