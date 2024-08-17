@@ -26,10 +26,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        coupleViewModel = ViewModelProvider(this)[CoupleViewModel::class.java]
+
         // Inflando o layout, mas sem configurar a UI completa ainda
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
 
         // Processa o Dynamic Link
         handleDynamicLink(intent) { inviteCodeExtracted ->
@@ -38,11 +39,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 navigateToLogin(inviteCodeExtracted)
             } else {
                 // Se o usuário estiver autenticado, continue com a configuração da UI
-                coupleViewModel = ViewModelProvider(this)[CoupleViewModel::class.java]
 
                 if (inviteCodeExtracted != null) {
                     coupleViewModel.joinCouple(Firebase.auth.currentUser!!.uid, inviteCodeExtracted)
                 }
+
+                coupleViewModel.checkCoupleStatus(Firebase.auth.uid)
 
                 // Configura o ViewPager e Navigation
                 setupViewPagerAndNavigation()

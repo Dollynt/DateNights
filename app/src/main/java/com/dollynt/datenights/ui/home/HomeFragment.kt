@@ -14,6 +14,8 @@ import com.dollynt.datenights.databinding.FragmentHomeNoCoupleBinding
 import com.dollynt.datenights.model.Option
 import com.dollynt.datenights.ui.couple.CoupleViewModel
 import com.dollynt.datenights.ui.selectOptions.SelectOptionsFragment
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment() {
@@ -30,34 +32,40 @@ class HomeFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_home_placeholder, container, false)
+
         coupleViewModel = ViewModelProvider(requireActivity())[CoupleViewModel::class.java]
         homeViewModel = ViewModelProvider(requireActivity())[HomeViewModel::class.java]
+
+        coupleViewModel.checkCoupleStatus(Firebase.auth.currentUser?.uid)
 
         coupleViewModel.isInCouple.observe(viewLifecycleOwner) { isCouple ->
             isInCouple = isCouple
             updateLayout(inflater, container)
         }
 
-        return binding?.root
+        return rootView
     }
 
     private fun updateLayout(inflater: LayoutInflater, container: ViewGroup?) {
         val fragmentContainer = view?.findViewById<FrameLayout>(R.id.fragment_container)
 
-        val newView = if (isInCouple == true) {
-            _bindingNoCouple = null
-            _binding = FragmentHomeBinding.inflate(inflater, container, false)
-            setupListeners()
-            binding?.root
+        if (isInCouple == true) {
+            if (_binding == null) {
+                _bindingNoCouple = null
+                _binding = FragmentHomeBinding.inflate(inflater, container, false)
+                setupListeners()
+            }
+            fragmentContainer?.removeAllViews()
+            fragmentContainer?.addView(binding?.root)
         } else {
-            _binding = null
-            _bindingNoCouple = FragmentHomeNoCoupleBinding.inflate(inflater, container, false)
-            bindingNoCouple?.root
+            if (_bindingNoCouple == null) {
+                _binding = null
+                _bindingNoCouple = FragmentHomeNoCoupleBinding.inflate(inflater, container, false)
+            }
+            fragmentContainer?.removeAllViews()
+            fragmentContainer?.addView(bindingNoCouple?.root)
         }
-
-        fragmentContainer?.removeAllViews()
-        fragmentContainer?.addView(newView)
     }
 
     private fun setupListeners() {
