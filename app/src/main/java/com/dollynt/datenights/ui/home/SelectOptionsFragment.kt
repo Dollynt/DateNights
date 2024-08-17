@@ -1,4 +1,4 @@
-package com.dollynt.datenights.ui.selectOptions
+package com.dollynt.datenights.ui.home
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,8 +15,6 @@ import androidx.fragment.app.Fragment
 import com.dollynt.datenights.R
 import com.dollynt.datenights.databinding.FragmentSelectOptionsBinding
 import com.dollynt.datenights.model.Option
-import com.dollynt.datenights.ui.home.HomeFragment
-import com.dollynt.datenights.ui.result.ResultFragment
 
 class SelectOptionsFragment : Fragment() {
 

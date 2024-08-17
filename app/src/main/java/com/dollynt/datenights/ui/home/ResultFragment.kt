@@ -1,6 +1,5 @@
-package com.dollynt.datenights.ui.result
+package com.dollynt.datenights.ui.home
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,10 +10,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import com.dollynt.datenights.R
 import com.dollynt.datenights.model.Option
-import com.dollynt.datenights.ui.home.HomeFragment
 
 class ResultFragment : Fragment() {
 
