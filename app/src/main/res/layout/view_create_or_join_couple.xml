@@ -1,21 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:padding="16dp">
+
+    <ImageView
+        android:id="@+id/createCoupleImage"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:src="@drawable/create_couple_image"
+        app:layout_constraintWidth_percent="0.7"
+        app:layout_constraintHeight_percent="0.4"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="ContentDescription" />
 
     <Button
         android:id="@+id/createCoupleButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Create Couple" />
+        android:text="Criar um casal"
+        android:background="@drawable/rounded_button"
+        android:textColor="@android:color/white"
+        app:layout_constraintTop_toBottomOf="@id/createCoupleImage"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <ImageView
+        android:id="@+id/joinCoupleImage"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:src="@drawable/join_couple_image"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.4"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/createCoupleButton"
+        app:layout_constraintWidth_percent="0.7"
+        tools:ignore="ContentDescription" />
 
     <Button
         android:id="@+id/showJoinCoupleLayoutButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Join Couple" />
-</LinearLayout>
+        android:text="Entrar em um casal"
+        android:background="@drawable/rounded_button"
+        android:textColor="@android:color/white"
+        app:layout_constraintTop_toBottomOf="@id/joinCoupleImage"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
