@@ -4,6 +4,7 @@ import android.app.Activity.RESULT_OK
 import android.app.DatePickerDialog
 import android.content.Intent
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.LayoutInflater
@@ -11,15 +12,25 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.bumptech.glide.Glide
 import com.dollynt.datenights.R
 import com.dollynt.datenights.databinding.FragmentEditProfileBinding
+import com.dollynt.datenights.model.User
+import com.dollynt.datenights.repository.UserRepository
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.UserProfileChangeRequest
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.*
 
 class EditProfileFragment : Fragment() {
 
     private var _binding: FragmentEditProfileBinding? = null
     private val binding get() = _binding!!
+    private val userRepository = UserRepository()
     private val REQUEST_IMAGE_CAPTURE = 1
+    private var user: User? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -90,19 +101,89 @@ class EditProfileFragment : Fragment() {
     }
 
     private fun loadUserData() {
-        // Carregar os dados do usuário para preencher os campos
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                user = userRepository.getUserData(uid)
+                user?.let {
+                    binding.editTextName.setText(it.name)
+                    binding.editTextBirthdate.setText(it.birthdate)
+                    binding.spinnerGender.setSelection(getGenderPosition(it.gender))
+
+                        if (!it.profilePictureUrl.isNullOrEmpty()) {
+                        Glide.with(this@EditProfileFragment).load(it.profilePictureUrl).into(binding.imageProfile)
+                    }
+                }
+            } catch (e: Exception) {
+                Toast.makeText(context, "Erro ao carregar dados do usuário", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun saveUserData() {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
         val name = binding.editTextName.text.toString()
         val gender = binding.spinnerGender.selectedItem.toString()
         val birthdate = binding.editTextBirthdate.text.toString()
+        val profilePictureUrl = user?.profilePictureUrl
 
         if (name.isEmpty() || birthdate.isEmpty()) {
             Toast.makeText(context, "Por favor, preencha todos os campos corretamente", Toast.LENGTH_SHORT).show()
-        } else {
-            // Salvar os dados do usuário
-            Toast.makeText(context, "Informações atualizadas com sucesso!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val updatedUser = User(
+            uid = uid,
+            email = user?.email,
+            name = name,
+            birthdate = birthdate,
+            gender = gender,
+            profilePictureUrl = profilePictureUrl
+        )
+
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                userRepository.saveUser(updatedUser)
+
+                val photoUri = if (profilePictureUrl.isNullOrEmpty()) null else Uri.parse(profilePictureUrl)
+                updateProfileInAuth(name, photoUri)
+
+                Toast.makeText(context, "Informações atualizadas com sucesso!", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                val errorMessage = "Erro ao salvar dados do usuário: ${e.message}"
+                Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun updateProfileInAuth(name: String, photoUri: Uri?) {
+        val user = FirebaseAuth.getInstance().currentUser
+
+        val profileUpdates = UserProfileChangeRequest.Builder()
+            .setDisplayName(name)
+            .apply {
+                if (photoUri != null) {
+                    setPhotoUri(photoUri)
+                }
+            }
+            .build()
+
+        user?.updateProfile(profileUpdates)
+            ?.addOnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    Toast.makeText(context, "Erro ao atualizar perfil no Firebase Auth", Toast.LENGTH_SHORT).show()
+                }
+            }
+    }
+
+    private fun getGenderPosition(gender: String?): Int {
+        return when (gender) {
+            "Masculino" -> 0
+            "Feminino" -> 1
+            "Outro" -> 2
+            else -> 0
         }
     }
 
