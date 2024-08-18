@@ -1,6 +1,5 @@
 package com.dollynt.datenights.ui.register
 
-import RegisterViewModel
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -9,8 +8,6 @@ import com.dollynt.datenights.MainActivity
 import com.dollynt.datenights.databinding.ActivityRegisterBinding
 import com.dollynt.datenights.ui.login.LoginActivity
 import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 
 class RegisterActivity : AppCompatActivity() {
 
@@ -23,7 +20,7 @@ class RegisterActivity : AppCompatActivity() {
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        viewModel = ViewModelProvider(this).get(RegisterViewModel::class.java)
+        viewModel = ViewModelProvider(this)[RegisterViewModel::class.java]
 
         inviteCode = intent.getStringExtra("inviteCode")
 

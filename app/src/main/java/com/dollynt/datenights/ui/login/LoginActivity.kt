@@ -1,6 +1,5 @@
 package com.dollynt.datenights.ui.login
 
-import LoginViewModel
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts

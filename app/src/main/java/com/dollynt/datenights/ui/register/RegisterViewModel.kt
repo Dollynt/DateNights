@@ -1,19 +1,25 @@
+package com.dollynt.datenights.ui.register
+
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.dollynt.datenights.model.User
 import com.dollynt.datenights.repository.CoupleRepository
+import com.dollynt.datenights.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.launch
 
 class RegisterViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = CoupleRepository(application)
     private val auth = FirebaseAuth.getInstance()
-    private val _user = MutableLiveData<FirebaseUser?>()
-    val user: LiveData<FirebaseUser?> = _user
+    private val userRepository = UserRepository()
+    private val coupleRepository = CoupleRepository(application)
+
+    private val _user = MutableLiveData<User?>()
+    val user: LiveData<User?> = _user
+
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> = _errorMessage
 
@@ -21,7 +27,14 @@ class RegisterViewModel(application: Application) : AndroidViewModel(application
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    _user.value = auth.currentUser
+                    viewModelScope.launch {
+                        try {
+                            val user = userRepository.createUserInFirestore()
+                            _user.value = user
+                        } catch (e: Exception) {
+                            _errorMessage.value = "Erro ao criar o usuário: ${e.message}"
+                        }
+                    }
                 } else {
                     _errorMessage.value = task.exception?.message
                 }
@@ -30,7 +43,7 @@ class RegisterViewModel(application: Application) : AndroidViewModel(application
 
     fun joinCouple(userId: String, inviteCode: String) {
         viewModelScope.launch {
-            repository.joinCouple(userId, inviteCode,
+            coupleRepository.joinCouple(userId, inviteCode,
                 onComplete = { success ->
                     if (!success) {
                         _errorMessage.postValue("Failed to join couple")
