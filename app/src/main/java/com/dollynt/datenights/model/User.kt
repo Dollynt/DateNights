@@ -1,12 +1,12 @@
 package com.dollynt.datenights.model
 
 data class User(
-    val uid: String,
-    val email: String?,
-    val name: String?,
-    val birthdate: String?,
-    val gender: String?,
-    val profilePictureUrl: String?
+    var uid: String,
+    var email: String?,
+    var name: String?,
+    var birthdate: String?,
+    var gender: String?,
+    var profilePictureUrl: String?
 ) {
     constructor() : this("", null, null, null, null, null)
 }

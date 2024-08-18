@@ -7,11 +7,15 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.EditText
 import android.widget.Toast
+import androidx.activity.addCallback
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.dollynt.datenights.R
@@ -20,9 +24,12 @@ import com.dollynt.datenights.model.User
 import com.dollynt.datenights.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
 import java.util.*
 
 class EditProfileFragment : Fragment() {
@@ -31,25 +38,32 @@ class EditProfileFragment : Fragment() {
     private val binding get() = _binding!!
     private val userRepository = UserRepository()
     private val REQUEST_IMAGE_CAPTURE = 1
+    private val REQUEST_IMAGE_PICK = 2
     private var user: User? = null
+    private lateinit var storageReference: StorageReference
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentEditProfileBinding.inflate(inflater, container, false)
 
+        storageReference = FirebaseStorage.getInstance().reference.child("profile_pictures")
+
+        setupGenderDropdown()
         loadUserData()
 
         binding.backIcon.setOnClickListener {
             goBackToProfileFragment()
         }
 
-        // Configurar botão de editar imagem
-        binding.buttonEditImage.setOnClickListener {
-            openImageSelector()
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            goBackToProfileFragment()
         }
 
-        // Configurar campo de data de nascimento
+        binding.buttonEditImage.setOnClickListener {
+            showImageOptionsDialog()
+        }
+
         binding.editTextBirthdate.setOnClickListener {
             showDatePickerDialog()
         }
@@ -61,6 +75,12 @@ class EditProfileFragment : Fragment() {
         return binding.root
     }
 
+    private fun setupGenderDropdown() {
+        val genderOptions = listOf("Masculino", "Feminino", "Outro")
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, genderOptions)
+        binding.autoCompleteGender.setAdapter(adapter)
+    }
+
     private fun goBackToProfileFragment() {
         val profileFragment = ProfileFragment()
         parentFragmentManager.beginTransaction()
@@ -70,11 +90,6 @@ class EditProfileFragment : Fragment() {
             )
             .replace(R.id.fragment_profile, profileFragment)
             .commit()
-    }
-
-    private fun openImageSelector() {
-        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
     }
 
     private fun showDatePickerDialog() {
@@ -93,24 +108,101 @@ class EditProfileFragment : Fragment() {
         datePickerDialog.show()
     }
 
+    private fun showImageOptionsDialog() {
+        val options = arrayOf("Tirar Foto", "Escolher da Galeria", "Usar Link da Internet")
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("Selecionar Imagem")
+        builder.setItems(options) { dialog, which ->
+            when (which) {
+                0 -> openCamera()
+                1 -> pickImageFromGallery()
+                2 -> promptForImageUrl()
+            }
+        }
+        builder.show()
+    }
+
+    private fun openCamera() {
+        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
+    }
+
+    private fun pickImageFromGallery() {
+        val pickPhoto = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        startActivityForResult(pickPhoto, REQUEST_IMAGE_PICK)
+    }
+
+    private fun promptForImageUrl() {
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("Inserir URL da Imagem")
+
+        val input = EditText(requireContext())
+        input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
+        builder.setView(input)
+
+        builder.setPositiveButton("OK") { dialog, which ->
+            val url = input.text.toString()
+            if (url.isNotEmpty()) {
+                setImageFromUrl(url)
+            } else {
+                Toast.makeText(requireContext(), "URL não pode ser vazio", Toast.LENGTH_SHORT).show()
+            }
+        }
+        builder.setNegativeButton("Cancelar") { dialog, _ -> dialog.cancel() }
+
+        builder.show()
+    }
+
+    private fun setImageFromUrl(url: String) {
+        Glide.with(this).load(url).into(binding.imageProfile)
+        user?.profilePictureUrl = url
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            val imageBitmap = data?.extras?.get("data") as Bitmap
-            binding.imageProfile.setImageBitmap(imageBitmap)
+        if (resultCode == RESULT_OK) {
+            when (requestCode) {
+                REQUEST_IMAGE_CAPTURE -> {
+                    val imageBitmap = data?.extras?.get("data") as Bitmap
+                    uploadImageToFirebase(imageBitmap)
+                }
+                REQUEST_IMAGE_PICK -> {
+                    val imageUri = data?.data
+                    imageUri?.let { uri ->
+                        uploadImageToFirebase(uri)
+                    }
+                }
+            }
         }
     }
 
-    private fun setupGenderDropdown() {
-        val genderOptions = listOf("Masculino", "Feminino", "Outro")
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, genderOptions)
-        binding.autoCompleteGender.setAdapter(adapter)
+    private fun uploadImageToFirebase(bitmap: Bitmap) {
+        val baos = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+        val data = baos.toByteArray()
 
-        val gender = user?.gender
-        if (!gender.isNullOrEmpty()) {
-            binding.autoCompleteGender.setText(gender, false)
-        } else {
-            binding.autoCompleteGender.setHint(R.string.not_defined)
+        val imageRef = storageReference.child("${UUID.randomUUID()}.jpg")
+        val uploadTask = imageRef.putBytes(data)
+
+        uploadTask.addOnSuccessListener {
+            imageRef.downloadUrl.addOnSuccessListener { uri ->
+                setImageFromUrl(uri.toString())
+            }
+        }.addOnFailureListener {
+            Toast.makeText(requireContext(), "Falha ao fazer upload da imagem", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun uploadImageToFirebase(uri: Uri) {
+        val imageRef = storageReference.child("${UUID.randomUUID()}.jpg")
+        val uploadTask = imageRef.putFile(uri)
+
+        uploadTask.addOnSuccessListener {
+            imageRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                setImageFromUrl(downloadUri.toString())
+            }
+        }.addOnFailureListener {
+            Toast.makeText(requireContext(), "Falha ao fazer upload da imagem", Toast.LENGTH_SHORT).show()
         }
     }
     private fun loadUserData() {
@@ -123,7 +215,9 @@ class EditProfileFragment : Fragment() {
                     binding.editTextName.setText(it.name)
                     binding.editTextBirthdate.setText(it.birthdate)
 
-                    setupGenderDropdown()
+                    if (!it.gender.isNullOrEmpty()) {
+                        binding.autoCompleteGender.setText(it.gender, false)
+                    }
 
                     if (!it.profilePictureUrl.isNullOrEmpty()) {
                         Glide.with(this@EditProfileFragment).load(it.profilePictureUrl).into(binding.imageProfile)
