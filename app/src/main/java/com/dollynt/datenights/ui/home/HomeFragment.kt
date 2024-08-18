@@ -77,15 +77,15 @@ class HomeFragment : Fragment() {
             }
         }
 
-        binding?.coupleOptionsButton?.setOnClickListener {
-            viewLifecycleOwner.lifecycleScope.launch {
-                val coupleId = coupleViewModel.couple.value?.id.toString()
-                homeViewModel.fetchOptions(coupleId)
-                homeViewModel.options.observe(viewLifecycleOwner) { options ->
-                    showSelectOptionsScreen(options)
-                }
-            }
-        }
+//        binding?.coupleOptionsButton?.setOnClickListener {
+//            viewLifecycleOwner.lifecycleScope.launch {
+//                val coupleId = coupleViewModel.couple.value?.id.toString()
+//                homeViewModel.fetchOptions(coupleId)
+//                homeViewModel.options.observe(viewLifecycleOwner) { options ->
+//                    showSelectOptionsScreen(options)
+//                }
+//            }
+//        }
     }
 
     private fun showSelectOptionsScreen(options: List<Option>) {

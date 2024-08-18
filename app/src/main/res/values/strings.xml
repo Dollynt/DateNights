@@ -44,4 +44,5 @@
     <string name="label_birthdate">Data de Nascimento</string>
     <string name="hint_birthdate">dd/mm/YYYY</string>
     <string name="button_save">Salvar</string>
+    <string name="choose_or_click_options">Clique no botão abaixo:</string>
 </resources>

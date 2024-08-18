@@ -42,7 +42,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Escolha uma opção abaixo:"
+        android:text="@string/choose_or_click_options"
         android:textColor="@color/brighterDark"
         android:textSize="18sp"
         android:textAlignment="viewStart"
@@ -93,30 +93,30 @@
         </LinearLayout>
 
         <!-- Botão Opções Personalizadas -->
-        <LinearLayout
-            android:id="@+id/couple_options_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/rounded_button"
-            android:backgroundTint="@color/white"
-            android:padding="16dp">
+<!--        <LinearLayout-->
+<!--            android:id="@+id/couple_options_button"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:orientation="vertical"-->
+<!--            android:background="@drawable/rounded_button"-->
+<!--            android:backgroundTint="@color/white"-->
+<!--            android:padding="16dp">-->
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/custom_options"
-                android:layout_gravity="center" />
+<!--            <ImageView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:src="@drawable/custom_options"-->
+<!--                android:layout_gravity="center" />-->
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Opções personalizadas"
-                android:textColor="@color/primaryColorDark"
-                android:textStyle="bold"
-                android:layout_gravity="center"
-                android:layout_marginTop="8dp" />
-        </LinearLayout>
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Opções personalizadas"-->
+<!--                android:textColor="@color/primaryColorDark"-->
+<!--                android:textStyle="bold"-->
+<!--                android:layout_gravity="center"-->
+<!--                android:layout_marginTop="8dp" />-->
+<!--        </LinearLayout>-->
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
