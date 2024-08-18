@@ -2,6 +2,7 @@ package com.dollynt.datenights.repository
 
 import com.dollynt.datenights.model.RandomizationResult
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 class RandomizationResultRepository {
 
@@ -15,6 +16,19 @@ class RandomizationResultRepository {
             }
             .addOnFailureListener { e ->
                 e.printStackTrace()
+            }
+    }
+
+    fun getRandomizationResultsForCouple(coupleId: String, onSuccess: (List<RandomizationResult>) -> Unit, onFailure: (Exception) -> Unit) {
+        randomizationResultsCollection
+            .whereEqualTo("coupleId", coupleId)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val results = snapshot.toObjects(RandomizationResult::class.java)
+                onSuccess(results)
+            }
+            .addOnFailureListener { e ->
+                onFailure(e)
             }
     }
 }

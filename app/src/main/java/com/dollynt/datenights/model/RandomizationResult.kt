@@ -4,8 +4,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 data class RandomizationResult(
-    val coupleId: String,
-    val results: List<String>,
+    val coupleId: String = "",
+    val results: List<String> = emptyList(),
     val createdAt: String = getCurrentTimestamp()
 ) {
     companion object {
