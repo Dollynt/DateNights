@@ -10,6 +10,7 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
@@ -100,6 +101,18 @@ class EditProfileFragment : Fragment() {
         }
     }
 
+    private fun setupGenderDropdown() {
+        val genderOptions = listOf("Masculino", "Feminino", "Outro")
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, genderOptions)
+        binding.autoCompleteGender.setAdapter(adapter)
+
+        val gender = user?.gender
+        if (!gender.isNullOrEmpty()) {
+            binding.autoCompleteGender.setText(gender, false)
+        } else {
+            binding.autoCompleteGender.setHint(R.string.not_defined)
+        }
+    }
     private fun loadUserData() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
@@ -109,9 +122,10 @@ class EditProfileFragment : Fragment() {
                 user?.let {
                     binding.editTextName.setText(it.name)
                     binding.editTextBirthdate.setText(it.birthdate)
-                    binding.spinnerGender.setSelection(getGenderPosition(it.gender))
 
-                        if (!it.profilePictureUrl.isNullOrEmpty()) {
+                    setupGenderDropdown()
+
+                    if (!it.profilePictureUrl.isNullOrEmpty()) {
                         Glide.with(this@EditProfileFragment).load(it.profilePictureUrl).into(binding.imageProfile)
                     }
                 }
@@ -125,11 +139,11 @@ class EditProfileFragment : Fragment() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
         val name = binding.editTextName.text.toString()
-        val gender = binding.spinnerGender.selectedItem.toString()
+        val gender = binding.autoCompleteGender.text.toString()
         val birthdate = binding.editTextBirthdate.text.toString()
         val profilePictureUrl = user?.profilePictureUrl
 
-        if (name.isEmpty() || birthdate.isEmpty()) {
+        if (name.isEmpty() || birthdate.isEmpty() || gender.isEmpty()) {
             Toast.makeText(context, "Por favor, preencha todos os campos corretamente", Toast.LENGTH_SHORT).show()
             return
         }
@@ -176,15 +190,6 @@ class EditProfileFragment : Fragment() {
                     Toast.makeText(context, "Erro ao atualizar perfil no Firebase Auth", Toast.LENGTH_SHORT).show()
                 }
             }
-    }
-
-    private fun getGenderPosition(gender: String?): Int {
-        return when (gender) {
-            "Masculino" -> 0
-            "Feminino" -> 1
-            "Outro" -> 2
-            else -> 0
-        }
     }
 
     override fun onDestroyView() {
