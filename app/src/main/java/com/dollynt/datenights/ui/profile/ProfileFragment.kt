@@ -6,12 +6,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.bumptech.glide.Glide
 import com.dollynt.datenights.R
 import com.dollynt.datenights.databinding.FragmentProfileBinding
 import com.dollynt.datenights.ui.login.LoginActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -25,6 +27,9 @@ class ProfileFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
+
+        // Carregar os dados do usuário
+        loadUserData()
 
         binding.buttonSettings.setOnClickListener {
             binding.fragmentProfile.removeAllViews()
@@ -45,6 +50,24 @@ class ProfileFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    private fun loadUserData() {
+        val user = FirebaseAuth.getInstance().currentUser
+
+        user?.let {
+            // Exibir o nome e o email do usuário
+            binding.nameTextView.text = it.displayName ?: getString(R.string.empty_name)
+            binding.emailTextView.text = it.email ?: getString(R.string.empty_email)
+
+            // Se o usuário tiver uma foto de perfil, carregue-a com o Glide
+            if (it.photoUrl != null) {
+                Glide.with(this).load(it.photoUrl).into(binding.imageView)
+            } else {
+                // Carregar uma imagem padrão caso o usuário não tenha uma foto de perfil
+                binding.imageView.setImageResource(R.drawable.empty_profile)
+            }
+        }
     }
 
     private fun logoutUser() {

@@ -46,7 +46,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 if (task.isSuccessful) {
                     val currentUser = auth.currentUser
                     currentUser?.let {
-                        checkAndCreateUser(it.uid, it.email)
+                        checkAndCreateUser(it.uid, it.email, it.displayName, it.photoUrl?.toString())
                     }
                 } else {
                     _errorMessage.value = task.exception?.message
@@ -54,7 +54,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             }
     }
 
-    private fun checkAndCreateUser(uid: String, email: String?) {
+    private fun checkAndCreateUser(uid: String, email: String?, name: String?, profilePictureUrl: String?) {
         viewModelScope.launch {
             try {
                 val user = userRepository.getUserData(uid)
@@ -63,10 +63,10 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                     val newUser = User(
                         uid,
                         email,
+                        name,
                         null,
                         null,
-                        null,
-                        null
+                        profilePictureUrl
                     )
                     userRepository.saveUser(newUser)
                     _user.value = newUser
