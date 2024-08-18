@@ -26,6 +26,22 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
     private val _couple = MutableLiveData<Couple?>()
     val couple: LiveData<Couple?> get() = _couple
 
+    init {
+        fetchCouple()
+    }
+
+    fun fetchCouple() {
+        val userId = Firebase.auth.currentUser?.uid ?: return
+
+        viewModelScope.launch {
+            repository.getCoupleByUserId(userId, { couple ->
+                _couple.postValue(couple)
+            }, { exception ->
+                handleException(exception)
+            })
+        }
+    }
+
     fun createCouple(userId: String) {
         viewModelScope.launch {
             repository.isUserInCouple(userId, { isInCouple ->

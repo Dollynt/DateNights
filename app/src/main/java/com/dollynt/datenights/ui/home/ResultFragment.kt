@@ -10,8 +10,12 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.dollynt.datenights.R
 import com.dollynt.datenights.model.Option
+import com.dollynt.datenights.model.RandomizationResult
+import com.dollynt.datenights.repository.RandomizationResultRepository
+import com.dollynt.datenights.ui.couple.CoupleViewModel
 
 class ResultFragment : Fragment() {
 
@@ -27,6 +31,10 @@ class ResultFragment : Fragment() {
         }
     }
 
+    private lateinit var randomizationResultRepository: RandomizationResultRepository
+    private lateinit var coupleViewModel: CoupleViewModel
+    private var currentResult: List<String>? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
@@ -41,6 +49,10 @@ class ResultFragment : Fragment() {
             requireActivity().supportFragmentManager.popBackStack()
         }
 
+        randomizationResultRepository = RandomizationResultRepository()
+
+        coupleViewModel = ViewModelProvider(requireActivity())[CoupleViewModel::class.java]
+
         val selectedOptions = arguments?.getSerializable(ARG_SELECTED_OPTIONS) as? List<Option>
 
         randomizeOptions(selectedOptions, view)
@@ -49,6 +61,7 @@ class ResultFragment : Fragment() {
         val btnNotSatisfied = view.findViewById<Button>(R.id.btn_randomize_again)
 
         btnSatisfied.setOnClickListener {
+            saveRandomizationResult()
             inflateHomeFragment()
         }
 
@@ -71,13 +84,20 @@ class ResultFragment : Fragment() {
     }
 
     private fun randomizeOptions(selectedOptions: List<Option>?, view: View) {
-        val resultMessage = selectedOptions?.joinToString(separator = "\n") { option ->
+        currentResult = selectedOptions?.map { option ->
             val randomSubOption = option.subOptions.randomOrNull() ?: "Nenhuma opção selecionada"
             "${option.name}: $randomSubOption"
-        } ?: "Nenhuma opção selecionada"
+        } ?: listOf("Nenhuma opção selecionada")
 
+        val resultMessage = currentResult!!.joinToString(separator = "\n")
         val resultText = view.findViewById<TextView>(R.id.result_text)
         resultText.text = resultMessage
+    }
+
+    private fun saveRandomizationResult() {
+        val coupleId = coupleViewModel.couple.value?.id ?: return
+        val randomizationResult = RandomizationResult(coupleId, currentResult!!)
+        randomizationResultRepository.saveRandomizationResult(randomizationResult)
     }
 
     private fun inflateHomeFragment() {
