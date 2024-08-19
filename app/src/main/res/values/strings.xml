@@ -50,4 +50,5 @@
     <string name="heart_icon_desc" />
     <string name="avatar2_desc">avatar2</string>
     <string name="null_name">Sem nome</string>
+    <string name="loading">loading</string>
 </resources>

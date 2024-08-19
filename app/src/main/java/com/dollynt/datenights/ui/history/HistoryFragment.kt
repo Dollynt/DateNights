@@ -32,32 +32,36 @@ class HistoryFragment : Fragment() {
         coupleViewModel = ViewModelProvider(requireActivity())[CoupleViewModel::class.java]
         randomizationResultViewModel = ViewModelProvider(this)[RandomizationResultViewModel::class.java]
 
-        coupleViewModel.couple.value?.id?.let {
-            randomizationResultViewModel.fetchRandomizationResults(
-                it
-            )
-        }
-
-        observeHistory()
-
         return binding
     }
 
     override fun onResume() {
         super.onResume()
-        coupleViewModel.couple.value?.id?.let {
-            randomizationResultViewModel.fetchRandomizationResults(
-                it
-            )
-        }
-
-        observeHistory()
+        fetchAndUpdateLayout()
     }
 
-    private fun observeHistory() {
-        randomizationResultViewModel.randomizationResults.observe(viewLifecycleOwner) { history ->
-            updateLayout(history)
+    private fun fetchAndUpdateLayout() {
+        val coupleId = coupleViewModel.couple.value?.id
+
+        if (coupleId != null) {
+            showLoadingLayout()
+
+            randomizationResultViewModel.fetchRandomizationResults(coupleId)
+            randomizationResultViewModel.randomizationResults.observe(viewLifecycleOwner) { history ->
+                updateLayout(history)
+            }
+        } else {
+            updateLayout(emptyList())
         }
+    }
+
+    private fun showLoadingLayout() {
+        val contentFrame = binding.findViewById<ViewGroup>(R.id.historyContentFrame)
+        val layoutInflater = LayoutInflater.from(context)
+
+        contentFrame.removeAllViews()
+        val loadingView = layoutInflater.inflate(R.layout.fragment_loading, contentFrame, false)
+        contentFrame.addView(loadingView)
     }
 
     private fun updateLayout(history: List<RandomizationResult>?) {
@@ -82,7 +86,6 @@ class HistoryFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = adapter
 
-        // Preencher o RecyclerView com os dados de histórico
         adapter.submitList(history)
     }
 
