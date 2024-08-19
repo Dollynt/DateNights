@@ -21,6 +21,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.dollynt.datenights.R
 import com.dollynt.datenights.databinding.FragmentCoupleBinding
+import com.dollynt.datenights.viewmodel.CoupleViewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 

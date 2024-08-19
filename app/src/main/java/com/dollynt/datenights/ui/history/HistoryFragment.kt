@@ -12,7 +12,7 @@ import androidx.transition.TransitionManager
 import com.dollynt.datenights.R
 import com.dollynt.datenights.adapter.RandomizationResultAdapter
 import com.dollynt.datenights.model.RandomizationResult
-import com.dollynt.datenights.ui.couple.CoupleViewModel
+import com.dollynt.datenights.viewmodel.CoupleViewModel
 import com.dollynt.datenights.viewmodel.RandomizationResultViewModel
 
 class HistoryFragment : Fragment() {

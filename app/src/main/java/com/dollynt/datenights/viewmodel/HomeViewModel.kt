@@ -1,4 +1,4 @@
-package com.dollynt.datenights.ui.home
+package com.dollynt.datenights.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel

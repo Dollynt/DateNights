@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
 import com.dollynt.datenights.adapter.ViewPagerAdapter
 import com.dollynt.datenights.databinding.ActivityMainBinding
-import com.dollynt.datenights.ui.couple.CoupleViewModel
+import com.dollynt.datenights.viewmodel.CoupleViewModel
 import com.dollynt.datenights.ui.login.LoginActivity
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.ktx.auth

@@ -12,7 +12,8 @@ import com.dollynt.datenights.R
 import com.dollynt.datenights.databinding.FragmentHomeBinding
 import com.dollynt.datenights.databinding.FragmentHomeNoCoupleBinding
 import com.dollynt.datenights.model.Option
-import com.dollynt.datenights.ui.couple.CoupleViewModel
+import com.dollynt.datenights.viewmodel.CoupleViewModel
+import com.dollynt.datenights.viewmodel.HomeViewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch

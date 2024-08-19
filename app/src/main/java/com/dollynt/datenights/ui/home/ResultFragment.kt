@@ -15,7 +15,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.dollynt.datenights.R
 import com.dollynt.datenights.model.Option
 import com.dollynt.datenights.model.RandomizationResult
-import com.dollynt.datenights.ui.couple.CoupleViewModel
+import com.dollynt.datenights.viewmodel.CoupleViewModel
 
 class ResultFragment : Fragment() {
 

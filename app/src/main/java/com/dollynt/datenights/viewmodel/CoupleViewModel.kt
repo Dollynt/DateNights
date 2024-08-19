@@ -1,4 +1,4 @@
-package com.dollynt.datenights.ui.couple
+package com.dollynt.datenights.viewmodel
 
 import android.app.Application
 import android.widget.Toast
