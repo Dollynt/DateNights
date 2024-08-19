@@ -20,6 +20,10 @@ import com.google.firebase.ktx.Firebase
 class CoupleCompleteFragment : Fragment() {
 
     private lateinit var viewModel: CoupleViewModel
+    private lateinit var avatar1: ImageView
+    private lateinit var name1: TextView
+    private lateinit var avatar2: ImageView
+    private lateinit var name2: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -27,32 +31,21 @@ class CoupleCompleteFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_couple_complete, container, false)
         viewModel = ViewModelProvider(requireActivity()).get(CoupleViewModel::class.java)
 
+        avatar1 = view.findViewById(R.id.avatar1)
+        name1 = view.findViewById(R.id.name1)
+        avatar2 = view.findViewById(R.id.avatar2)
+        name2 = view.findViewById(R.id.name2)
+        val leaveCoupleButton = view.findViewById<Button>(R.id.leave_couple_button)
+
         viewModel.getUsers(onComplete = { users ->
             if (users.isNotEmpty()) {
                 val user1 = users[0]
                 val user2 = users.getOrNull(1)
 
-                val avatar1 = view.findViewById<ImageView>(R.id.avatar1)
-                val name1 = view.findViewById<TextView>(R.id.name1)
-                val avatar2 = view.findViewById<ImageView>(R.id.avatar2)
-                val name2 = view.findViewById<TextView>(R.id.name2)
-                val leaveCoupleButton = view.findViewById<Button>(R.id.leave_couple_button)
-
                 if (isAdded) {
-                    Glide.with(this)
-                        .load(user1["profilePictureUrl"] as? String)
-                        .placeholder(R.drawable.empty_profile)
-                        .into(avatar1)
-
-                    name1.text = user1["name"] as? String ?: getString(R.string.null_name)
-
+                    updateUserInfo(user1, avatar1, name1)
                     if (user2 != null) {
-                        Glide.with(this)
-                            .load(user2["profilePictureUrl"] as? String)
-                            .placeholder(R.drawable.empty_profile)
-                            .into(avatar2)
-
-                        name2.text = user2["name"] as? String ?: getString(R.string.null_name)
+                        updateUserInfo(user2, avatar2, name2)
                     } else {
                         avatar2.setImageResource(R.drawable.empty_profile)
                         name2.text = getString(R.string.null_name)
@@ -69,6 +62,38 @@ class CoupleCompleteFragment : Fragment() {
         })
 
         return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        viewModel.getUsers(onComplete = { users ->
+            if (users.isNotEmpty()) {
+                val user1 = users[0]
+                val user2 = users.getOrNull(1)
+
+                if (isAdded) {
+                    updateUserInfo(user1, avatar1, name1)
+                    if (user2 != null) {
+                        updateUserInfo(user2, avatar2, name2)
+                    } else {
+                        avatar2.setImageResource(R.drawable.empty_profile)
+                        name2.text = getString(R.string.null_name)
+                    }
+                }
+            }
+        }, onError = { exception ->
+            Toast.makeText(context, "Erro ao atualizar os usuários: ${exception.message}", Toast.LENGTH_SHORT).show()
+        })
+    }
+
+    private fun updateUserInfo(user: Map<String, Any>, avatarView: ImageView, nameView: TextView) {
+        Glide.with(this)
+            .load(user["profilePictureUrl"] as? String)
+            .placeholder(R.drawable.empty_profile)
+            .into(avatarView)
+
+        nameView.text = user["name"] as? String ?: getString(R.string.null_name)
     }
 
     private fun showLeaveCoupleConfirmationDialog() {

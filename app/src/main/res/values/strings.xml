@@ -27,10 +27,10 @@
     <string name="login_message">Já tem uma conta?</string>
     <string name="login">Login</string>
     <string name="logout">Logout</string>
-    <string name="title_home">Home</string>
-    <string name="title_couple">Couple</string>
-    <string name="title_history">History\n</string>
-    <string name="title_profile">Profile</string>
+    <string name="title_home">Página Inicial</string>
+    <string name="title_couple">Casal</string>
+    <string name="title_history">Histórico\n</string>
+    <string name="title_profile">Perfil</string>
     <string name="copy_code">code</string>
     <string name="copy_link">link</string>
     <string name="share_link">link</string>
@@ -51,4 +51,6 @@
     <string name="avatar2_desc">avatar2</string>
     <string name="null_name">Sem nome</string>
     <string name="loading">loading</string>
+    <string name="are_together">Estão juntos!</string>
+    <string name="leave_couple">Sair do Casal</string>
 </resources>
