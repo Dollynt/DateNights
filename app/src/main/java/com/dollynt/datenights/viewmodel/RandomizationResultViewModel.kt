@@ -1,3 +1,4 @@
+package com.dollynt.datenights.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -26,5 +27,22 @@ class RandomizationResultViewModel(application: Application) : AndroidViewModel(
                 _randomizationResults.postValue(emptyList())
             }
         )
+    }
+
+    fun saveRandomizationResult(randomizationResult: RandomizationResult) {
+        viewModelScope.launch {
+            try {
+                repository.saveRandomizationResult(
+                    randomizationResult,
+                    onSuccess = {
+                        val currentResults = _randomizationResults.value?.toMutableList() ?: mutableListOf()
+                        currentResults.add(randomizationResult)
+                        _randomizationResults.postValue(currentResults)
+                    }
+                )
+            } catch (e: Exception) {
+                println("Error in saveRandomizationResult: $e")
+            }
+        }
     }
 }

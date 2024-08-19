@@ -1,4 +1,4 @@
-package com.dollynt.datenights.ui.home
+package com.dollynt.datenights.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

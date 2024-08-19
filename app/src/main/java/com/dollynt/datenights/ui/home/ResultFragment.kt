@@ -1,5 +1,6 @@
 package com.dollynt.datenights.ui.home
 
+import com.dollynt.datenights.viewmodel.RandomizationResultViewModel
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,7 +15,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.dollynt.datenights.R
 import com.dollynt.datenights.model.Option
 import com.dollynt.datenights.model.RandomizationResult
-import com.dollynt.datenights.repository.RandomizationResultRepository
 import com.dollynt.datenights.ui.couple.CoupleViewModel
 
 class ResultFragment : Fragment() {
@@ -31,7 +31,7 @@ class ResultFragment : Fragment() {
         }
     }
 
-    private lateinit var randomizationResultRepository: RandomizationResultRepository
+    private lateinit var randomizationResultViewModel: RandomizationResultViewModel
     private lateinit var coupleViewModel: CoupleViewModel
     private var currentResult: List<String>? = null
 
@@ -49,8 +49,7 @@ class ResultFragment : Fragment() {
             requireActivity().supportFragmentManager.popBackStack()
         }
 
-        randomizationResultRepository = RandomizationResultRepository()
-
+        randomizationResultViewModel = ViewModelProvider(requireActivity())[RandomizationResultViewModel::class.java]
         coupleViewModel = ViewModelProvider(requireActivity())[CoupleViewModel::class.java]
 
         val selectedOptions = arguments?.getSerializable(ARG_SELECTED_OPTIONS) as? List<Option>
@@ -97,7 +96,7 @@ class ResultFragment : Fragment() {
     private fun saveRandomizationResult() {
         val coupleId = coupleViewModel.couple.value?.id ?: return
         val randomizationResult = RandomizationResult(coupleId, currentResult!!)
-        randomizationResultRepository.saveRandomizationResult(randomizationResult)
+        randomizationResultViewModel.saveRandomizationResult(randomizationResult)
     }
 
     private fun inflateHomeFragment() {

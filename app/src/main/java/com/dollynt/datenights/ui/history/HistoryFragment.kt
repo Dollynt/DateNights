@@ -1,6 +1,5 @@
 package com.dollynt.datenights.ui.history
 
-import RandomizationResultViewModel
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,15 +7,17 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.TransitionManager
 import com.dollynt.datenights.R
-import com.dollynt.datenights.databinding.FragmentHistoryBinding
+import com.dollynt.datenights.adapter.RandomizationResultAdapter
 import com.dollynt.datenights.model.RandomizationResult
-import com.dollynt.datenights.ui.home.RandomizationResultAdapter
 import com.dollynt.datenights.ui.couple.CoupleViewModel
+import com.dollynt.datenights.viewmodel.RandomizationResultViewModel
 
 class HistoryFragment : Fragment() {
 
-    private var _binding: FragmentHistoryBinding? = null
+    private var _binding: View? = null
     private val binding get() = _binding!!
 
     private lateinit var randomizationResultViewModel: RandomizationResultViewModel
@@ -25,30 +26,29 @@ class HistoryFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View? {
-        _binding = FragmentHistoryBinding.inflate(inflater, container, false)
+    ): View {
+        _binding = inflater.inflate(R.layout.fragment_history_placeholder, container, false)
 
-        randomizationResultViewModel = ViewModelProvider(this)[RandomizationResultViewModel::class.java]
         coupleViewModel = ViewModelProvider(requireActivity())[CoupleViewModel::class.java]
+        randomizationResultViewModel = ViewModelProvider(this)[RandomizationResultViewModel::class.java]
 
-        setupRecyclerView()
+        coupleViewModel.couple.value?.id?.let {
+            randomizationResultViewModel.fetchRandomizationResults(
+                it
+            )
+        }
 
-        observeCouple()
+        observeHistory()
 
-        return binding.root
+        return binding
     }
 
-    private fun setupRecyclerView() {
-        adapter = RandomizationResultAdapter()
-        binding.recyclerViewHistory.layoutManager = LinearLayoutManager(context)
-        binding.recyclerViewHistory.adapter = adapter
-    }
-
-    private fun observeCouple() {
-        coupleViewModel.couple.observe(viewLifecycleOwner) { couple ->
-            couple?.let {
-                randomizationResultViewModel.fetchRandomizationResults(it.id)
-            }
+    override fun onResume() {
+        super.onResume()
+        coupleViewModel.couple.value?.id?.let {
+            randomizationResultViewModel.fetchRandomizationResults(
+                it
+            )
         }
 
         observeHistory()
@@ -56,25 +56,41 @@ class HistoryFragment : Fragment() {
 
     private fun observeHistory() {
         randomizationResultViewModel.randomizationResults.observe(viewLifecycleOwner) { history ->
-            if (history.isNullOrEmpty()) {
-                navigateToNoHistoryFragment()
-            } else {
-                showHistory(history)
-            }
+            updateLayout(history)
         }
     }
 
-    private fun showHistory(history: List<RandomizationResult>) {
+    private fun updateLayout(history: List<RandomizationResult>?) {
+        val contentFrame = binding.findViewById<ViewGroup>(R.id.historyContentFrame)
+        val layoutInflater = LayoutInflater.from(context)
+
+        contentFrame.removeAllViews()
+
+        if (history.isNullOrEmpty()) {
+            showNoHistoryLayout(layoutInflater, contentFrame)
+        } else {
+            showHistoryLayout(layoutInflater, contentFrame, history)
+        }
+    }
+
+    private fun showHistoryLayout(layoutInflater: LayoutInflater, contentFrame: ViewGroup, history: List<RandomizationResult>) {
+        val historyView = layoutInflater.inflate(R.layout.fragment_history, contentFrame, false)
+        contentFrame.addView(historyView)
+
+        val recyclerView = historyView.findViewById<RecyclerView>(R.id.recycler_view_history)
+        adapter = RandomizationResultAdapter()
+        recyclerView.layoutManager = LinearLayoutManager(context)
+        recyclerView.adapter = adapter
+
+        // Preencher o RecyclerView com os dados de histórico
         adapter.submitList(history)
     }
 
-    private fun navigateToNoHistoryFragment() {
-        parentFragmentManager.beginTransaction()
-            .replace(R.id.fragment_history, NoHistoryFragment())
-            .addToBackStack(null)
-            .commit()
+    private fun showNoHistoryLayout(layoutInflater: LayoutInflater, contentFrame: ViewGroup) {
+        val noHistoryView = layoutInflater.inflate(R.layout.fragment_no_history, contentFrame, false)
+        TransitionManager.beginDelayedTransition(contentFrame)
+        contentFrame.addView(noHistoryView)
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()
