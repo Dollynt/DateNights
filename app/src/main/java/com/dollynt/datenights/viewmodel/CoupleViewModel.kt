@@ -86,7 +86,11 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
             repository.leaveCouple(userId, couple.value?.id,
                 onComplete = { success ->
                     if (success) {
-                        setupCouple()
+                        _isCoupleComplete.postValue(false)
+                        _isInCouple.postValue(false)
+                        _inviteLink.postValue("")
+                        _inviteCode.postValue("")
+                        _couple.postValue(null)
                     } else {
                         Toast.makeText(getApplication(), "Failed to join couple", Toast.LENGTH_SHORT).show()
                     }
