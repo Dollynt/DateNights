@@ -12,7 +12,7 @@
         android:id="@+id/welcome_message"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Bem-vindo!"
+        android:text="@string/welcome"
         android:textSize="28sp"
         android:textStyle="bold"
         android:textColor="@color/primaryColorDark"
@@ -27,7 +27,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Deseja randomizar um encontro?"
+        android:text="@string/wish_to_randomize"
         android:textColor="@color/textSecondaryColor"
         android:textSize="18sp"
         android:textAlignment="viewStart"
@@ -71,8 +71,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@drawable/rounded_button"
-            android:backgroundTint="@color/white"
+            android:background="@drawable/rounded_button_with_stroke"
             android:padding="16dp"
             android:layout_marginBottom="8dp">
 
@@ -85,7 +84,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Opções do aplicativo"
+                android:text="@string/app_options"
                 android:textColor="@color/primaryColorDark"
                 android:textStyle="bold"
                 android:layout_gravity="center"

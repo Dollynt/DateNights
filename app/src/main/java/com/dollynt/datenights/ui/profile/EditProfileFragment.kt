@@ -215,9 +215,12 @@ class EditProfileFragment : Fragment() {
                     binding.editTextName.setText(it.name)
                     binding.editTextBirthdate.setText(it.birthdate)
 
-                    if (!it.gender.isNullOrEmpty()) {
-                        binding.autoCompleteGender.setText(it.gender, false)
+                    val genderToDisplay = if (!it.gender.isNullOrEmpty()) {
+                        it.gender
+                    } else {
+                        "Não definido"
                     }
+                    binding.autoCompleteGender.setText(genderToDisplay, false)
 
                     if (!it.profilePictureUrl.isNullOrEmpty()) {
                         Glide.with(this@EditProfileFragment).load(it.profilePictureUrl).into(binding.imageProfile)
@@ -228,6 +231,7 @@ class EditProfileFragment : Fragment() {
             }
         }
     }
+
 
     private fun saveUserData() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
@@ -259,12 +263,23 @@ class EditProfileFragment : Fragment() {
                 updateProfileInAuth(name, photoUri)
 
                 Toast.makeText(context, "Informações atualizadas com sucesso!", Toast.LENGTH_SHORT).show()
+
+                val profileFragment = ProfileFragment()
+                parentFragmentManager.beginTransaction()
+                    .setCustomAnimations(
+                        R.anim.slide_in_left,
+                        R.anim.slide_out_right
+                    )
+                    .replace(R.id.fragment_profile, profileFragment)
+                    .commit()
+
             } catch (e: Exception) {
                 val errorMessage = "Erro ao salvar dados do usuário: ${e.message}"
                 Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
             }
         }
     }
+
 
     private fun updateProfileInAuth(name: String, photoUri: Uri?) {
         val user = FirebaseAuth.getInstance().currentUser

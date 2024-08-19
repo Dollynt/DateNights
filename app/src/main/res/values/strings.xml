@@ -15,7 +15,7 @@
     <string name="prompt_password">Senha</string>
     <string name="action_sign_in">Login</string>
     <string name="action_sign_in_short">Sign in</string>
-    <string name="welcome">"Welcome !"</string>
+    <string name="welcome">"Bem vindo!"</string>
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
@@ -54,4 +54,9 @@
     <string name="are_together">Estão juntos!</string>
     <string name="leave_couple">Sair do Casal</string>
     <string name="error_processing_link">Erro ao processar convite por link</string>
+    <string name="history">Histórico</string>
+    <string name="wish_to_randomize">Deseja randomizar um encontro?</string>
+    <string name="app_options">Opções do aplicativo</string>
+    <string name="join_couple">Entrar no casal</string>
+    <string name="enter_code">Digite ou cole o código</string>
 </resources>
