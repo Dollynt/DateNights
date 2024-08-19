@@ -180,4 +180,60 @@ class CoupleRepository(context: Context) {
                 onComplete("")
             }
     }
+
+    fun leaveCouple(userId: String, coupleId: String?, onComplete: (Boolean) -> Unit, onError: (Exception) -> Unit) {
+        if (coupleId == null) {
+            onError(Exception("Couple ID is null"))
+            return
+        }
+
+        db.collection("couples").document(coupleId)
+            .update("users", FieldValue.arrayRemove(userId))
+            .addOnSuccessListener {
+                // Check if the couple is empty after removing the user
+                db.collection("couples").document(coupleId)
+                    .get()
+                    .addOnSuccessListener {
+                        onComplete(true)
+                    }
+                    .addOnFailureListener { exception ->
+                        onError(exception)
+                    }
+            }
+            .addOnFailureListener { exception ->
+                onError(exception)
+            }
+    }
+
+    fun getUsers(coupleId: String?, onComplete: (List<Map<String, Any>>) -> Unit, onError: (Exception) -> Unit) {
+        if (coupleId == null) {
+            onError(Exception("Couple ID is null"))
+            return
+        }
+
+        db.collection("couples").document(coupleId)
+            .get()
+            .addOnSuccessListener { document ->
+                val userIds = document.get("users") as? List<String>
+                println("User IDs: $userIds")
+                if (userIds != null && userIds.isNotEmpty()) {
+                    db.collection("users")
+                        .whereIn("uid", userIds)
+                        .get()
+                        .addOnSuccessListener { snapshot ->
+                            val userList = snapshot.documents.map { it.data ?: emptyMap<String, Any>() }
+                            onComplete(userList)
+                        }
+                        .addOnFailureListener { exception ->
+                            onError(exception)
+                        }
+                } else {
+                    onComplete(emptyList())
+                }
+            }
+            .addOnFailureListener { exception ->
+                onError(exception)
+            }
+    }
+
 }

@@ -80,6 +80,38 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    fun leaveCouple(userId: String) {
+        viewModelScope.launch {
+            val userId = Firebase.auth.currentUser?.uid ?: return@launch
+            repository.leaveCouple(userId, couple.value?.id,
+                onComplete = { success ->
+                    if (success) {
+                        setupCouple()
+                    } else {
+                        Toast.makeText(getApplication(), "Failed to join couple", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                onError = { exception ->
+                    handleException(exception)
+                }
+            )
+        }
+    }
+
+    fun getUsers(onComplete: (List<Map<String, Any>>) -> Unit, onError: (Exception) -> Unit) {
+        viewModelScope.launch {
+            repository.getUsers(couple.value?.id,
+                onComplete = { users ->
+                    println("Users: ${users}")
+                    onComplete(users)
+                },
+                onError = { exception ->
+                    onError(exception)
+                }
+            )
+        }
+    }
+
     fun deleteCouple(userId: String) {
         viewModelScope.launch {
             repository.deleteCouple(userId, {
@@ -138,7 +170,10 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+
+
     private fun handleException(exception: Exception) {
         Toast.makeText(getApplication(), exception.message, Toast.LENGTH_SHORT).show()
     }
+
 }

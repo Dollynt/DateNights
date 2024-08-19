@@ -18,6 +18,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.bumptech.glide.Glide
 import com.dollynt.datenights.R
 import com.dollynt.datenights.databinding.FragmentCoupleBinding
 import com.google.firebase.auth.ktx.auth
@@ -76,7 +77,54 @@ class CoupleFragment : Fragment() {
 
     private fun showCoupleComplete(layoutInflater: LayoutInflater, contentFrame: ViewGroup) {
         val coupleCompleteView = layoutInflater.inflate(R.layout.view_couple_complete, contentFrame, false)
-        contentFrame.addView(coupleCompleteView)
+
+        viewModel.getUsers(onComplete = { users ->
+            if (users.isNotEmpty()) {
+                // Debug: Certifique-se de que os usuários foram carregados
+                println("Usuários carregados: $users")
+
+                val user1 = users[0]
+                val user2 = users.getOrNull(1)
+
+                // Referências às Views do layout inflado
+                val avatar1 = coupleCompleteView.findViewById<ImageView>(R.id.avatar1)
+                val name1 = coupleCompleteView.findViewById<TextView>(R.id.name1)
+                val avatar2 = coupleCompleteView.findViewById<ImageView>(R.id.avatar2)
+                val name2 = coupleCompleteView.findViewById<TextView>(R.id.name2)
+                val leaveCoupleButton = coupleCompleteView.findViewById<Button>(R.id.leave_couple_button)
+
+                // Carrega o avatar e o nome do primeiro usuário
+                Glide.with(this)
+                    .load(user1["profilePictureUrl"] as? String)
+                    .placeholder(R.drawable.empty_profile)
+                    .into(avatar1)
+
+                name1.text = user1["name"] as? String ?: getString(R.string.null_name)
+
+                // Carrega o avatar e o nome do segundo usuário, se existir
+                if (user2 != null) {
+                    Glide.with(this)
+                        .load(user2["profilePictureUrl"] as? String)
+                        .placeholder(R.drawable.empty_profile)
+                        .into(avatar2)
+
+                    name2.text = user2["name"] as? String ?: getString(R.string.null_name)
+                } else {
+                    avatar2.setImageResource(R.drawable.empty_profile)
+                    name2.text = getString(R.string.null_name)
+                }
+
+                // Configura o botão de sair do casal
+                leaveCoupleButton.setOnClickListener {
+                    Firebase.auth.currentUser?.uid?.let { it1 -> viewModel.leaveCouple(it1) }
+                }
+
+                // Adiciona a view inflada ao contentFrame
+                contentFrame.addView(coupleCompleteView)
+            }
+        }, onError = { exception ->
+            Toast.makeText(context, "Erro ao carregar os usuários: ${exception.message}", Toast.LENGTH_SHORT).show()
+        })
     }
 
     private fun showInviteOptions(layoutInflater: LayoutInflater, contentFrame: ViewGroup) {

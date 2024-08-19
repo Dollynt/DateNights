@@ -46,4 +46,8 @@
     <string name="button_save">Salvar</string>
     <string name="choose_or_click_options">Clique no botão abaixo:</string>
     <string name="not_defined">Não definido</string>
+    <string name="avatar1_desc" >Avatar 1</string>
+    <string name="heart_icon_desc" />
+    <string name="avatar2_desc">avatar2</string>
+    <string name="null_name">Sem nome</string>
 </resources>
