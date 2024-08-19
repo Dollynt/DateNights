@@ -7,12 +7,13 @@ import androidx.lifecycle.ViewModelProvider
 import com.dollynt.datenights.MainActivity
 import com.dollynt.datenights.databinding.ActivityRegisterBinding
 import com.dollynt.datenights.ui.login.LoginActivity
+import com.dollynt.datenights.ui.user.UserViewModel
 import com.google.android.material.snackbar.Snackbar
 
 class RegisterActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRegisterBinding
-    private lateinit var viewModel: RegisterViewModel
+    private lateinit var viewModel: UserViewModel
     private var inviteCode: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,7 +21,7 @@ class RegisterActivity : AppCompatActivity() {
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        viewModel = ViewModelProvider(this)[RegisterViewModel::class.java]
+        viewModel = ViewModelProvider(this)[UserViewModel::class.java]
 
         inviteCode = intent.getStringExtra("inviteCode")
 

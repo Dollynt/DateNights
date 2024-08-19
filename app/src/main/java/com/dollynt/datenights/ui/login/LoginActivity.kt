@@ -9,6 +9,7 @@ import com.dollynt.datenights.MainActivity
 import com.dollynt.datenights.R
 import com.dollynt.datenights.databinding.ActivityLoginBinding
 import com.dollynt.datenights.ui.register.RegisterActivity
+import com.dollynt.datenights.ui.user.UserViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -17,7 +18,7 @@ import com.google.android.material.snackbar.Snackbar
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
-    private lateinit var viewModel: LoginViewModel
+    private lateinit var viewModel: UserViewModel
     private var inviteCode: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,7 +26,7 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        viewModel = ViewModelProvider(this)[LoginViewModel::class.java]
+        viewModel = ViewModelProvider(this)[UserViewModel::class.java]
 
         inviteCode = intent.getStringExtra("inviteCode")
 

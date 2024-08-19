@@ -1,4 +1,4 @@
-package com.dollynt.datenights.ui.login
+package com.dollynt.datenights.ui.user
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -8,12 +8,12 @@ import androidx.lifecycle.viewModelScope
 import com.dollynt.datenights.model.User
 import com.dollynt.datenights.repository.CoupleRepository
 import com.dollynt.datenights.repository.UserRepository
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import kotlinx.coroutines.launch
 
-class LoginViewModel(application: Application) : AndroidViewModel(application) {
+class UserViewModel(application: Application) : AndroidViewModel(application) {
 
     private val auth = FirebaseAuth.getInstance()
     private val userRepository = UserRepository()
@@ -47,6 +47,24 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                     val currentUser = auth.currentUser
                     currentUser?.let {
                         checkAndCreateUser(it.uid, it.email, it.displayName, it.photoUrl?.toString())
+                    }
+                } else {
+                    _errorMessage.value = task.exception?.message
+                }
+            }
+    }
+
+    fun registerWithEmailAndPassword(email: String, password: String) {
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    viewModelScope.launch {
+                        try {
+                            val user = userRepository.createUserInFirestore()
+                            _user.value = user
+                        } catch (e: Exception) {
+                            _errorMessage.value = "Erro ao criar o usuário: ${e.message}"
+                        }
                     }
                 } else {
                     _errorMessage.value = task.exception?.message
