@@ -17,7 +17,6 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
     private val auth = FirebaseAuth.getInstance()
     private val userRepository = UserRepository()
-    private val coupleRepository = CoupleRepository(application)
 
     private val _user = MutableLiveData<User?>()
     val user: LiveData<User?> = _user
@@ -106,21 +105,6 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             } catch (e: Exception) {
                 _errorMessage.value = "Erro ao carregar os dados do usuário: ${e.message}"
             }
-        }
-    }
-
-    fun joinCouple(userId: String, inviteCode: String) {
-        viewModelScope.launch {
-            coupleRepository.joinCouple(userId, inviteCode,
-                onComplete = { success ->
-                    if (!success) {
-                        _errorMessage.postValue("Failed to join couple")
-                    }
-                },
-                onError = { exception ->
-                    _errorMessage.postValue(exception.message)
-                }
-            )
         }
     }
 }

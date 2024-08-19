@@ -53,4 +53,5 @@
     <string name="loading">loading</string>
     <string name="are_together">Estão juntos!</string>
     <string name="leave_couple">Sair do Casal</string>
+    <string name="error_processing_link">Erro ao processar convite por link</string>
 </resources>

@@ -144,7 +144,7 @@ class CoupleRepository(context: Context) {
                     val document = snapshot.documents[0]
                     val users = document.get("users")
                     if (users is List<*>) {
-                        val isComplete = users.size == 2
+                        val isComplete = users.size >= 2
                         onComplete(isComplete)
                     } else {
                         onComplete(false)
