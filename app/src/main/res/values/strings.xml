@@ -59,4 +59,7 @@
     <string name="app_options">Opções do aplicativo</string>
     <string name="join_couple">Entrar no casal</string>
     <string name="enter_code">Digite ou cole o código</string>
+    <string name="create_couple">Criar um casal</string>
+    <string name="join_in_couple">Entrar em um casal</string>
+    <string name="go_back">Voltar</string>
 </resources>

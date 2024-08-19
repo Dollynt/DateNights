@@ -16,7 +16,7 @@ class CoupleFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        viewModel = ViewModelProvider(requireActivity()).get(CoupleViewModel::class.java)
+        viewModel = ViewModelProvider(requireActivity())[CoupleViewModel::class.java]
         return inflater.inflate(R.layout.fragment_couple_container, container, false)
     }
 

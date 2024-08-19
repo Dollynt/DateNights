@@ -39,7 +39,14 @@ class JoinCoupleFragment : Fragment() {
         }
 
         backIcon.setOnClickListener {
-            parentFragmentManager.popBackStack()
+            parentFragmentManager.beginTransaction()
+                .setCustomAnimations(
+                    R.anim.fade_in,
+                    R.anim.fade_out
+                )
+                .replace(R.id.coupleContentFrame, CreateOrJoinCoupleFragment())
+                .addToBackStack(null)
+                .commit()
         }
 
         return view

@@ -26,7 +26,7 @@ class RandomizationResultAdapter :
 
         fun bind(randomizationResult: RandomizationResult) {
             binding.textDate.text = randomizationResult.createdAt
-            binding.textResults.text = randomizationResult.results.joinToString(separator = "\n") {
+            binding.textResults.text = randomizationResult.results.joinToString(separator = "\n\n") {
                 "• $it"
             }
         }

@@ -31,6 +31,10 @@ class CreateOrJoinCoupleFragment : Fragment() {
 
         showJoinCoupleLayoutButton.setOnClickListener {
             parentFragmentManager.beginTransaction()
+                .setCustomAnimations(
+                    R.anim.fade_in,
+                    R.anim.fade_out
+                )
                 .replace(R.id.coupleContentFrame, JoinCoupleFragment())
                 .addToBackStack(null)
                 .commit()
